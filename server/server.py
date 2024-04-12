@@ -46,7 +46,8 @@ def send_message(message, queue):
     channel = connection.channel()
     channel.queue_declare(queue=queue, durable=True)
     logging.debug("Sending message to %s:\n%s", queue, json.dumps(message, indent=2))
-    channel.basic_publish(exchange='', routing_key=queue, body=json.dumps(message))
+    properties = pika.BasicProperties(delivery_mode=2)
+    channel.basic_publish(exchange='', routing_key=queue, properties=properties, body=json.dumps(message))
     channel.close()
     connection.close()
 
