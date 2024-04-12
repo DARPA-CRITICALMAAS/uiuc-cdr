@@ -58,10 +58,12 @@ def process_map(cog_id, cog_url):
     """
     Process the map
     """
-    logging.debug("Processing COG %s from %s", cog_id, cog_url)
+    logging.info("Processing COG %s from %s", cog_id, cog_url)
     message = {
         "cog_id": cog_id,
-        "cog_url": cog_url
+        "cog_url": cog_url,
+        "system": current_app.config["name"],
+        "version": current_app.config["version"]
     }
     headers = {'Authorization': f'Bearer {current_app.config["cdr_token"]}'}
     r = requests.get(f"{cdr_url}/v1/maps/cog/{cog_id}", headers=headers)
