@@ -1,10 +1,9 @@
 #!/bin/bash
 
-VERSION=0.0.4
+VERSION=0.0.5
 
-sed -i~ "s#SYSTEM_VERSION=.*#SYSTEM_VERSION=\"${VERSION}\" \\\\#" Dockerfile
-sed -i~ "s#image: ncsa/criticalmaas-cdr:.*#image: ncsa/criticalmaas-cdr:${VERSION}#" docker-compose.yml
+sed -i~ "s#SYSTEM_VERSION=.*#SYSTEM_VERSION=\"${VERSION}\" \\\\#" server/Dockerfile
+
+sed -i~ "s#image: ncsa/criticalmaas-\([^:]*\):.*#image: ncsa/criticalmaas-\1:${VERSION}#" docker-compose.yml
 sed -i~ "s#SYSTEM_VERSION: .*#SYSTEM_VERSION: \"${VERSION}\"#" docker-compose.yml
-rm Dockerfile~ docker-compose.yml~
-
-docker build -t ncsa/criticalmaas-cdr:${VERSION} .
+rm -f server/Dockerfile~ monitor/Dockerfile~ docker-compose.yml~
