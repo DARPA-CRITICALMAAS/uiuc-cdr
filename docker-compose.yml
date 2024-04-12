@@ -1,12 +1,10 @@
-version: "3.2"
-
 services:
 
   # ----------------------------------------------------------------------
   # REVERSE PROXY
   # ----------------------------------------------------------------------
   traefik:
-    image: "traefik:v2.10"
+    image: "traefik:v2.11"
     command:
       - --log.level=INFO
       - --api=true
@@ -48,6 +46,7 @@ services:
   # ----------------------------------------------------------------------
   rabbitmq:
     image: rabbitmq:management-alpine
+    hostname: rabbitmq
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME:-guest}"
@@ -62,15 +61,16 @@ services:
   # CDR HOOK
   # ----------------------------------------------------------------------
   cdrhook:
-    image: ncsa/criticalmaas-cdr:0.0.4
-    build: .
+    image: ncsa/criticalmaas-cdr:0.0.5
+    hostname: cdrhook
+    build: server
     restart: unless-stopped
     depends_on:
       - rabbitmq
     environment:
       CDR_TOKEN: "${CDR_TOKEN}"
       SYSTEM_NAME: "ncsa"
-      SYSTEM_VERSION: "0.0.4"
+      SYSTEM_VERSION: "0.0.5"
       CALLBACK_URL: "https://${SERVER_NAME}${CALLBACK_PATH}"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
@@ -80,6 +80,24 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.cdrhook.rule=Host(`${SERVER_NAME}`) && PathPrefix(`${CALLBACK_PATH}`)"
+
+  # ----------------------------------------------------------------------
+  # RABBITMQ MONITOR
+  # ----------------------------------------------------------------------
+  monitor:
+    image: ncsa/criticalmaas-monitor:0.0.5
+    hostname: monitor
+    build: monitor
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_MGMT_URL: ${RABBITMQ_MGMT_URL}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.monitor.rule=Host(`${SERVER_NAME}`) && PathPrefix(`/monitor`)"
 
 volumes:
   traefik:
