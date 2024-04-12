@@ -36,10 +36,6 @@ services:
     volumes:
       - "traefik:/config"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`${SERVER_NAME}`)"
-      - "traefik.http.routers.api.service=api@internal"
 
   # ----------------------------------------------------------------------
   # MESSAGE BROKER
@@ -61,7 +57,7 @@ services:
   # CDR HOOK
   # ----------------------------------------------------------------------
   cdrhook:
-    image: ncsa/criticalmaas-cdr:0.0.5
+    image: ncsa/criticalmaas-cdr:${SYSTEM_VERSION}
     hostname: cdrhook
     build: server
     restart: unless-stopped
@@ -69,8 +65,8 @@ services:
       - rabbitmq
     environment:
       CDR_TOKEN: "${CDR_TOKEN}"
-      SYSTEM_NAME: "ncsa"
-      SYSTEM_VERSION: "0.0.5"
+      SYSTEM_NAME: ${SYSTEM_NAME}
+      SYSTEM_VERSION: ${SYSTEM_VERSION}
       CALLBACK_URL: "https://${SERVER_NAME}${CALLBACK_PATH}"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
@@ -85,7 +81,7 @@ services:
   # RABBITMQ MONITOR
   # ----------------------------------------------------------------------
   monitor:
-    image: ncsa/criticalmaas-monitor:0.0.5
+    image: ncsa/criticalmaas-monitor:${SYSTEM_VERSION}
     hostname: monitor
     build: monitor
     restart: unless-stopped
