@@ -12,3 +12,5 @@ at least need to set `SERVER_NAME` and `CDR_TOKEN`.
 
 The unregister.sh script can be used to remove any hanging registrations with CDR, and the versions.sh
 script can be used to set the version for the cdr-hook application.
+
+This also contains a simple monitor to see the number of messages in the queue that still need processing.
