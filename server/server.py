@@ -184,7 +184,7 @@ def create_app():
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
                                ' %(name)s - %(message)s',
-                        level=logging.INFO)
+                        level=logging.DEBUG)
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
     logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
     logging.getLogger('pika').setLevel(logging.WARN)

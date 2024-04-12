@@ -5,7 +5,7 @@ EXPOSE 8080
 
 ENV PYTHONUNBUFFERED=1 \
     SYSTEM_NAME="ncsa" \
-    SYSTEM_VERSION="0.0.4" \
+    SYSTEM_VERSION="0.0.5" \
     CDR_TOKEN="" \
     CALLBACK_SECRET="this_is_a_really_silly_secret" \
     CALLBACK_URL="" \
@@ -16,5 +16,5 @@ ENV PYTHONUNBUFFERED=1 \
 COPY requirements.txt ./
 RUN pip install -r ./requirements.txt
 
-COPY * ./
+COPY * .
 ENTRYPOINT ["python", "server.py"]
