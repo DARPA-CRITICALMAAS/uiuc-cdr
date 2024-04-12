@@ -18,10 +18,10 @@ services:
       - --entrypoints.https.address=:443
       - --entrypoints.https.http.tls.certresolver=myresolver
       # letsencrypt
-      #- --certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL}
+      - --certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL}
       - --certificatesresolvers.myresolver.acme.storage=/config/acme.json
       # uncomment to use testing certs
-      - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.myresolver.acme.httpchallenge=true
       - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
       # Docker setup
