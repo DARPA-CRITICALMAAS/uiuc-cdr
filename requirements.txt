@@ -1,0 +1,5 @@
+flask
+waitress
+flask_httpauth
+requests
+pika
