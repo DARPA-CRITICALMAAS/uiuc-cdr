@@ -5,7 +5,7 @@ EXPOSE 8080
 
 ENV PYTHONUNBUFFERED=1 \
     SYSTEM_NAME="ncsa" \
-    SYSTEM_VERSION="0.0.6" \
+    SYSTEM_VERSION="0.0.7" \
     CDR_TOKEN="" \
     CALLBACK_SECRET="this_is_a_really_silly_secret" \
     CALLBACK_URL="" \

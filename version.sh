@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=0.0.6
+VERSION=0.0.7
 
 sed -i~ "s#SYSTEM_VERSION=.*#SYSTEM_VERSION=\"${VERSION}\" \\\\#" server/Dockerfile
 

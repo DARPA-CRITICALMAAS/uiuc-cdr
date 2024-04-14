@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 
-import datetime
 import http.server
 import json
 import logging
 import os
-import threading
-import time
-import urllib.parse
-
+import sys
 import requests
 
 # ----------------------------------------------------------------------
@@ -25,26 +21,44 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
       self.path = '/'
 
     if self.path.startswith('queues.json'):
-      queues = []
+      queues = {}
       try:
         rabbitmq_mgmt_url = os.environ.get('RABBITMQ_MGMT_URL', 'http://rabbitmq:15672')
         rabbitmq_username = os.environ.get('RABBITMQ_USERNAME', 'guest')
         rabbitmq_password = os.environ.get('RABBITMQ_PASSWORD', 'guest')
         response = requests.get(f"{rabbitmq_mgmt_url}/api/queues/%2F", auth=(rabbitmq_username, rabbitmq_password), timeout=5)
         response.raise_for_status()
-        for queue in response.json():
-          queues.append({
-            'queue': queue['name'],
-            'messages': queue['messages'],
-            'consumers': queue['consumers']
-          })
+        for data in response.json():
+          if data['name'].endswith(".error"):
+            queue = data['name'][:-6]
+            consumers = data['consumers']
+            messages = 0
+            errors = data['messages']
+          else:
+            queue = data['name']
+            consumers = data['consumers']
+            messages = data['messages']
+            errors = 0
+
+          if queue in queues:
+            if messages != 0:
+              queues[queue]['messages'] = messages
+            if errors != 0:
+              queues[queue]['errors'] = errors
+          else:
+            queues[queue] = {
+              'queue': queue,
+              'consumers': consumers,
+              'messages': messages,
+              'errors': errors,
+            }
       except:
         logging.exception("Error getting queues from RabbitMQ.")
-        queues = []
+        queues = {}
       self.send_response(200)
       self.send_header('Content-type', 'application/json')
       self.end_headers()
-      self.wfile.write(bytes(json.dumps(queues), 'utf-8'))
+      self.wfile.write(bytes(json.dumps(list(queues.values())), 'utf-8'))
     else:
       super().do_GET()
 
@@ -54,9 +68,11 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
   logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
-                 ' %(name)s - %(message)s',
-            level=logging.INFO)
+                              ' %(name)s - %(message)s',
+                      level=logging.DEBUG)
   logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
+  logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
+  logging.getLogger('pika').setLevel(logging.WARN)
 
   server = http.server.HTTPServer(("", 9999), MyServer)
   try:

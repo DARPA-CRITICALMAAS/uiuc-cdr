@@ -3,7 +3,7 @@
   <head>
     <title>CriticalMaas Queue Monitor</title>
 
-    <link rel="icon" href="favicon.png">
+    <link rel="icon" href="favicon.ico">
 
     <!-- Bootstrap core CSS -->
     <link href="bootstrap.min.css" rel="stylesheet">
@@ -34,6 +34,7 @@
             <th data-field="queue" data-sortable="true" scope="col">Queue</th>
             <th data-field="consumers" data-sortable="true" scope="col">Consumers</th>
             <th data-field="messages" data-sortable="true" scope="col">Messages</th>
+            <th data-field="errors" data-sortable="true" scope="col">Errors</th>
           </tr>
         </thead>
         <tbody>
@@ -48,21 +49,5 @@
     <script src="jquery-3.3.1.min.js"></script>
     <script src="bootstrap.min.js"></script>
     <script src="bootstrap-table.min.js"></script>
- 
-    <script type="text/javascript">
-      function rowAttributes(row, index) {
-        console.log(row);
-        return {
-          'data-toggle': 'popover',
-          'data-placement': 'bottom',
-          'data-trigger': 'hover',
-          'data-content': row['description']
-        }
-      }
-
-      function responseHandler(data) {
-        return data;
-      }
-    </script>
-  </body>
+   </body>
 </html>

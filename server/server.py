@@ -96,9 +96,7 @@ def hook():
     # check the signature
     validate_request(request.data, request.headers.get("x-cdr-signature-256"), current_app.config["callback_secret"])
 
-    # bug in CDR, it sends the data as a string, not a JSON object
-    # data = request.get_json()
-    data = json.loads(request.data)
+    data = request.get_json()
     if data.get("event") == "ping":
         logging.debug("Received ping")
     elif data.get("event") == "map.process":

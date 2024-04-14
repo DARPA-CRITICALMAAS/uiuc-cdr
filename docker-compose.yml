@@ -47,9 +47,6 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME:-guest}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-guest}"
-    ports:
-      - "5672:5672"
-      - "15672:15672"
     volumes:
       - rabbitmq:/var/lib/rabbitmq
 
@@ -95,6 +92,39 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.monitor.rule=Host(`${SERVER_NAME}`) && PathPrefix(`/monitor`)"
 
+  # ----------------------------------------------------------------------
+  # DATA PROCESSING PIPELINE
+  # use one, or more, per model to be executed
+  # ----------------------------------------------------------------------
+  pipeline:
+    image: ncsa/criticalmaas-pipeline
+    build: ../uiuc-pipeline
+    runtime: nvidia
+    depends_on:
+      - rabbitmq
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    command:
+      - -v 
+      - --data
+      - /data
+      - --log
+      - /logs/logs.latest
+      - --output
+      - /output
+      - --amqp
+      - "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      - --model
+      - golden_muscat
+    restart: "unless-stopped"
+    volumes:
+      - "data:/data"
+      - "logs:/logs"
+      - "output:/output"
+
 volumes:
   traefik:
   rabbitmq:
+  data:
+  logs:
+  output:
