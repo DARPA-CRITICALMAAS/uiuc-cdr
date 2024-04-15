@@ -22,9 +22,8 @@ class Worker(threading.Thread):
         try:
             data = json.loads(self.body)
             file = os.path.join("/output", data['cdr_output'])
-            logging.info(f"Uploading data for {data['cog_id']} from {file}")
+            logging.debug(f"Uploading data for {data['cog_id']} from {file}")
             headers = {'Authorization': f'Bearer {cdr_token}', 'Content-Type': 'application/json'}
-            logging.info(headers)
             with open(file, 'rb') as f:
                 response = requests.post(f'{cdr_url}/v1/maps/publish/features', data=f, headers=headers)
                 logging.debug(response.text)
@@ -76,7 +75,7 @@ def main():
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
                                ' %(name)s - %(message)s',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
     logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
     logging.getLogger('pika').setLevel(logging.WARN)
