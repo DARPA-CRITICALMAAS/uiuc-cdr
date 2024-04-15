@@ -122,6 +122,22 @@ services:
       - "logs:/logs"
       - "output:/output"
 
+  # ----------------------------------------------------------------------
+  # DATA PROCESSING PIPELINE
+  # use one, or more, per model to be executed
+  # ----------------------------------------------------------------------
+  uploader:
+    image: ncsa/criticalmaas-uploader
+    build: uploader
+    restart: "unless-stopped"
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      CDR_TOKEN: "${CDR_TOKEN}"
+    volumes:
+      - "output:/output"
+
 volumes:
   traefik:
   rabbitmq:
