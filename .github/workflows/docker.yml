@@ -46,7 +46,7 @@ jobs:
           # list of Docker images to use as base name for tags
           images: |
             ncsa/${{ matrix.IMAGE }}
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.IMAGE }}
+          # ghcr.io/${{ github.repository_owner }}/${{ matrix.IMAGE }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=schedule
@@ -55,7 +55,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha     
 
       # setup docker build
       - name: Set up QEMU
@@ -80,12 +79,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
       # build the docker images
       - name: Build and push ${{ matrix.name }}
