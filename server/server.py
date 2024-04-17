@@ -100,7 +100,12 @@ def hook():
     if data.get("event") == "ping":
         logging.debug("Received ping")
     elif data.get("event") == "map.process":
-        process_map(data["payload"]["cog_id"], data["payload"]["cog_url"])
+        try:
+            process_map(data["payload"]["cog_id"], data["payload"]["cog_url"])
+        except:
+            logging.exception("Could not process hook")
+            data["x-cdr-signature-256"] = request.data, request.headers.get("x-cdr-signature-256")
+            send_message(data, "cdrhook.error")
     else:
         logging.debug("Unknown event: %s", data.get("event"))
 

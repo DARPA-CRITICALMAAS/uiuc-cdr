@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.1.0] - 2024-04-16
 
+### Added
+- if cdrhook fails, push message to cdrhook.error
+
 ### Changed
 - uploaded will now load cdr json and add cog_id, system and system_version.
 
