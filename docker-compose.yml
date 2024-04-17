@@ -49,6 +49,7 @@ services:
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-guest}"
     volumes:
       - rabbitmq:/var/lib/rabbitmq
+      - ./50-criticalmaas.conf:/etc/rabbitmq/conf.d/50-criticalmaas.conf:ro
 
   # ----------------------------------------------------------------------
   # CDR HOOK
@@ -114,6 +115,8 @@ services:
       - /logs/logs.latest
       - --output
       - /output
+      - --feedback
+      - /feedback
       - --amqp
       - "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
       - --model
@@ -123,6 +126,7 @@ services:
       - "data:/data"
       - "logs:/logs"
       - "output:/output"
+      - "feedback:/feedback"
 
   # ----------------------------------------------------------------------
   # DATA PROCESSING PIPELINE
@@ -145,6 +149,7 @@ services:
 volumes:
   traefik:
   rabbitmq:
+  feedback:
   data:
   logs:
   output:

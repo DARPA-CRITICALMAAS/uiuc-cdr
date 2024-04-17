@@ -3,6 +3,7 @@ import logging
 import os
 import pika
 import requests
+from requests.exceptions import RequestException
 import threading
 
 # rabbitmq uri
@@ -25,9 +26,17 @@ class Worker(threading.Thread):
             logging.debug(f"Uploading data for {data['cog_id']} from {file}")
             headers = {'Authorization': f'Bearer {cdr_token}', 'Content-Type': 'application/json'}
             with open(file, 'rb') as f:
-                response = requests.post(f'{cdr_url}/v1/maps/publish/features', data=f, headers=headers)
-                logging.debug(response.text)
-                response.raise_for_status()
+                cdr_data = json.load(f)
+            # TODO this needs to be in pipeline.py
+            cdr_data['cog_id'] = data['cog_id']
+            cdr_data['system'] = data['system']
+            cdr_data['system_version'] = data['version']
+            response = requests.post(f'{cdr_url}/v1/maps/publish/features', data=json.dumps(cdr_data), headers=headers)
+            logging.debug(response.text)
+            response.raise_for_status()
+        except RequestException as e:
+            logging.exception(f"Request Error {response.text}.")
+            self.exception = e
         except Exception as e:
             logging.exception("Error processing pipeline request.")
             self.exception = e
