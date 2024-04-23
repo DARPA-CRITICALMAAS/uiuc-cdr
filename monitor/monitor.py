@@ -33,23 +33,36 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
             queue = data['name'][:-6]
             consumers = data['consumers']
             messages = 0
+            unknown = 0
             errors = data['messages']
+          elif data['name'].endswith(".unknown"):
+            queue = data['name'][:-8]
+            consumers = data['consumers']
+            messages = 0
+            unknown = data['messages']
+            errors = 0
           else:
             queue = data['name']
             consumers = data['consumers']
             messages = data['messages']
+            unknown = 0
             errors = 0
 
           if queue in queues:
+            if consumers != 0:
+              queues[queue]['consumers'] = consumers
             if messages != 0:
               queues[queue]['messages'] = messages
             if errors != 0:
               queues[queue]['errors'] = errors
+            if unknown != 0:
+              queues[queue]['unknown'] = unknown
           else:
             queues[queue] = {
               'queue': queue,
               'consumers': consumers,
               'messages': messages,
+              'unknown': unknown,
               'errors': errors,
             }
       except:
