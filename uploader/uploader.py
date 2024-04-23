@@ -10,6 +10,7 @@ import threading
 rabbitmq_uri = os.getenv("RABBITMQ_URI", "amqp://guest:guest@localhost:5672/%2F")
 cdr_url = "https://api.cdr.land"
 cdr_token = os.getenv("CDR_TOKEN", "")
+max_size = int(os.getenv("MAX_SIZE", "300"))
 
 
 class Worker(threading.Thread):
@@ -24,6 +25,9 @@ class Worker(threading.Thread):
             data = json.loads(self.body)
             file = os.path.join("/output", data['cdr_output'])
             logging.debug(f"Uploading data for {data['cog_id']} from {file}")
+            # only upload if less than certain size
+            if os.path.getsize(file) > max_size * 1024 * 1024:  # size in bytes
+                raise ValueError(f"File {file} is larger than {max_size}MB, skipping upload.")
             headers = {'Authorization': f'Bearer {cdr_token}', 'Content-Type': 'application/json'}
             with open(file, 'rb') as f:
                 cdr_data = json.load(f)
