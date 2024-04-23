@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.2.0] - 2024-04-16
+
+### Added
+- can record unknown events in rabbitmq (CDR_KEEP_EVENT=yes)
+- monitor number of unknown events from cdrhook
+
+### Changed
+- docker-compose file now uses latest tag
+
+### Fixed
+- fixed error in uploaded with getting value from dict
+
 ## [0.1.0] - 2024-04-16
 
 ### Added
