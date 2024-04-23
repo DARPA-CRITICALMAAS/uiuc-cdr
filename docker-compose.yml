@@ -55,7 +55,7 @@ services:
   # CDR HOOK
   # ----------------------------------------------------------------------
   cdrhook:
-    image: ncsa/criticalmaas-cdr:${SYSTEM_VERSION}
+    image: ncsa/criticalmaas-cdr:latest
     hostname: cdrhook
     build: server
     restart: unless-stopped
@@ -63,6 +63,7 @@ services:
       - rabbitmq
     environment:
       CDR_TOKEN: "${CDR_TOKEN}"
+      CDR_KEEP_EVENT: "no"
       SYSTEM_NAME: ${SYSTEM_NAME}
       SYSTEM_VERSION: ${SYSTEM_VERSION}
       CALLBACK_URL: "https://${SERVER_NAME}${CALLBACK_PATH}"
@@ -79,7 +80,7 @@ services:
   # RABBITMQ MONITOR
   # ----------------------------------------------------------------------
   monitor:
-    image: ncsa/criticalmaas-monitor:${SYSTEM_VERSION}
+    image: ncsa/criticalmaas-monitor:latest
     hostname: monitor
     build: monitor
     restart: unless-stopped
@@ -98,7 +99,7 @@ services:
   # use one, or more, per model to be executed
   # ----------------------------------------------------------------------
   pipeline:
-    image: ncsa/criticalmaas-pipeline
+    image: ncsa/criticalmaas-pipeline:latest
     build: ../uiuc-pipeline
     runtime: nvidia
     profiles:
@@ -133,7 +134,7 @@ services:
   # use one, or more, per model to be executed
   # ----------------------------------------------------------------------
   uploader:
-    image: ncsa/criticalmaas-uploader
+    image: ncsa/criticalmaas-uploader:latest
     build: uploader
     restart: "unless-stopped"
     profiles:
