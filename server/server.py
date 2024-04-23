@@ -17,6 +17,24 @@ cdr_url = "https://api.cdr.land"
 
 
 # ----------------------------------------------------------------------
+# HELPER
+# ----------------------------------------------------------------------
+def strtobool (val):
+    """Convert a string representation of truth to true (1) or false (0).
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+    'val' is anything else.
+    """
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return 0
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
+
+
+# ----------------------------------------------------------------------
 # Authentication/Verification
 # ----------------------------------------------------------------------
 @auth.verify_password
@@ -45,7 +63,6 @@ def send_message(message, queue):
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     channel.queue_declare(queue=queue, durable=True)
-    logging.debug("Sending message to %s:\n%s", queue, json.dumps(message, indent=2))
     properties = pika.BasicProperties(delivery_mode=2)
     channel.basic_publish(exchange='', routing_key=queue, properties=properties, body=json.dumps(message))
     channel.close()
@@ -97,17 +114,22 @@ def hook():
     validate_request(request.data, request.headers.get("x-cdr-signature-256"), current_app.config["callback_secret"])
 
     data = request.get_json()
+    logging.info("Received event : %s", data.get("event"))
     if data.get("event") == "ping":
-        logging.debug("Received ping")
+        pass
     elif data.get("event") == "map.process":
         try:
             process_map(data["payload"]["cog_id"], data["payload"]["cog_url"])
-        except:
+        except Exception as e:
             logging.exception("Could not process hook")
-            data["x-cdr-signature-256"] = request.data, request.headers.get("x-cdr-signature-256")
-            send_message(data, "cdrhook.error")
-    else:
-        logging.debug("Unknown event: %s", data.get("event"))
+            mesg = {
+              "x-cdr-signature-256": request.headers.get("x-cdr-signature-256"),
+              "exception": str(e),
+              "data": request.data
+            }
+            send_message(mesg, "cdrhook.error")
+    elif current_app.config["cdr_keep_event"]:
+        send_message(data, "cdrhook.unknown")
 
     return {"ok": "success"}
 
@@ -168,6 +190,7 @@ def create_app():
     app.config["callback_password"] = os.getenv("CALLBACK_PASSWORD")
     app.config["rabbitmq_uri"] = os.getenv("RABBITMQ_URI")
     app.config["queue"] = os.getenv("DOWNLOAD_QUEUE", "download")
+    app.config["cdr_keep_event"] = strtobool(os.getenv("CDR_KEEP_EVENT", "no"))
 
     # register with the CDR
     registration = register_system(app.config)
