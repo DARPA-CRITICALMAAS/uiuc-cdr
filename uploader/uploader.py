@@ -76,7 +76,7 @@ def main():
                     data['exception'] = repr(worker.exception)
                     channel.basic_publish(exchange='', routing_key=f"upload.error", body=json.dumps(data), properties=worker.properties)
                 else:
-                    logging.info(f"Finished all processing steps for map {data.cog_id}")
+                    logging.info(f"Finished all processing steps for map {data['cog_id']}")
                 channel.basic_ack(delivery_tag=worker.method.delivery_tag)
                 worker = None
 
