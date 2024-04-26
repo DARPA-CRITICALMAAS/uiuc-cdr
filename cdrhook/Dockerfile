@@ -12,7 +12,8 @@ ENV PYTHONUNBUFFERED=1 \
     CALLBACK_URL="" \
     CALLBACK_USERNAME="" \
     CALLBACK_PASSWORD="" \
-    RABBITMQ_URI="amqp://guest:guest@localhost:5672/%2F"
+    RABBITMQ_URI="amqp://guest:guest@localhost:5672/%2F" \
+    PREFIX=""
 
 COPY requirements.txt ./
 RUN pip install -r ./requirements.txt

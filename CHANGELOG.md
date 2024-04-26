@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.0] - 2024-04-26
+
+### Added
+- can now set a prefix for all queue names (PREFIX="")
+
+### Changed
+- renamed server folder to cdrhook
+- monitor shows number of messages processing, "61 / 1" means 61 messages waiting, 1 being processed
+
 ## [0.3.0] - 2024-04-23
 
 ### Added

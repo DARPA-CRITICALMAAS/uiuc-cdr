@@ -2,7 +2,8 @@ FROM python:3.11
 
 # environemnt variables
 ENV RABBITMQ_URI="amqp://guest:guest@localhost:5672/%2F" \
-    MODELS="golden_muscat flat_iceberg" \
+    PREFIX="" \
+    CDR_TOKEN="" \
     MAX_SIZE=300
 
 WORKDIR /src

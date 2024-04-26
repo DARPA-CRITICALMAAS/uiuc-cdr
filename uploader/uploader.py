@@ -8,6 +8,11 @@ import threading
 
 # rabbitmq uri
 rabbitmq_uri = os.getenv("RABBITMQ_URI", "amqp://guest:guest@localhost:5672/%2F")
+
+# prefix for the queue names
+prefix = os.getenv("PREFIX", "")
+
+# CDR url, token and max size for upload (in MB)
 cdr_url = "https://api.cdr.land"
 cdr_token = os.getenv("CDR_TOKEN", "")
 max_size = int(os.getenv("MAX_SIZE", "300"))
@@ -56,14 +61,14 @@ def main():
     channel = connection.channel()
 
     # create queues
-    channel.queue_declare(queue="upload", durable=True)
-    channel.queue_declare(queue="upload.error", durable=True)
+    channel.queue_declare(queue=f"{prefix}upload", durable=True)
+    channel.queue_declare(queue=f"{prefix}upload.error", durable=True)
 
     # listen for messages and stop if nothing found after 5 minutes
     channel.basic_qos(prefetch_count=1)
 
     # create generator to fetch messages
-    consumer = channel.consume(queue="upload", inactivity_timeout=1)
+    consumer = channel.consume(queue=f"{prefix}upload", inactivity_timeout=1)
 
     # loop getting new messages
     worker = None
@@ -78,7 +83,7 @@ def main():
                 data = json.loads(worker.body)
                 if worker.exception:
                     data['exception'] = repr(worker.exception)
-                    channel.basic_publish(exchange='', routing_key=f"upload.error", body=json.dumps(data), properties=worker.properties)
+                    channel.basic_publish(exchange='', routing_key=f"{prefix}upload.error", body=json.dumps(data), properties=worker.properties)
                 else:
                     logging.info(f"Finished all processing steps for map {data['cog_id']}")
                 channel.basic_ack(delivery_tag=worker.method.delivery_tag)

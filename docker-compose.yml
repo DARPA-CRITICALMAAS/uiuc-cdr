@@ -57,7 +57,7 @@ services:
   cdrhook:
     image: ncsa/criticalmaas-cdr:latest
     hostname: cdrhook
-    build: server
+    build: cdrhook
     restart: unless-stopped
     depends_on:
       - rabbitmq
@@ -71,7 +71,7 @@ services:
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
       CALLBACK_PASSWORD: "${CALLBACK_PASSWORD}"
       RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
-      DOWNLOAD_QUEUE: "download"
+      PREFIX: ""
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.cdrhook.rule=Host(`${SERVER_NAME}`) && PathPrefix(`${CALLBACK_PATH}`)"
@@ -107,7 +107,8 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+      NVIDIA_VISIBLE_DEVICES: all
+      PREFIX: ""
     command:
       - -v 
       - --data
@@ -142,8 +143,9 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
       CDR_TOKEN: "${CDR_TOKEN}"
+      RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      PREFIX: ""
     volumes:
       - "output:/output"
 

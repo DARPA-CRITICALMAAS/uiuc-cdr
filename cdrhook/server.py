@@ -90,7 +90,7 @@ def process_map(cog_id, cog_url):
     r = requests.get(f"{cdr_url}/v1/maps/cog/{cog_id}/results", headers=headers)
     r.raise_for_status()
     message['results'] = r.json()
-    send_message(message, current_app.config["queue"])
+    send_message(message, f'{current_app.config["prefix"]}download')
 
 
 def validate_request(data, signature_header, secret):
@@ -127,9 +127,9 @@ def hook():
               "exception": str(e),
               "data": request.data
             }
-            send_message(mesg, "cdrhook.error")
+            send_message(mesg, f'{current_app.config["prefix"]}cdrhook.error')
     elif current_app.config["cdr_keep_event"]:
-        send_message(data, "cdrhook.unknown")
+        send_message(data, f'{current_app.config["prefix"]}cdrhook.unknown')
 
     return {"ok": "success"}
 
@@ -189,7 +189,7 @@ def create_app():
     app.config["callback_username"] = os.getenv("CALLBACK_USERNAME")
     app.config["callback_password"] = os.getenv("CALLBACK_PASSWORD")
     app.config["rabbitmq_uri"] = os.getenv("RABBITMQ_URI")
-    app.config["queue"] = os.getenv("DOWNLOAD_QUEUE", "download")
+    app.config["prefix"] = os.getenv("PREFIX")
     app.config["cdr_keep_event"] = strtobool(os.getenv("CDR_KEEP_EVENT", "no"))
 
     # register with the CDR

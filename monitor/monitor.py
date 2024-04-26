@@ -32,26 +32,26 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
           if data['name'].endswith(".error"):
             queue = data['name'][:-6]
             consumers = data['consumers']
-            messages = 0
+            messages = None
             unknown = 0
             errors = data['messages']
           elif data['name'].endswith(".unknown"):
             queue = data['name'][:-8]
             consumers = data['consumers']
-            messages = 0
+            messages = None
             unknown = data['messages']
             errors = 0
           else:
             queue = data['name']
             consumers = data['consumers']
-            messages = data['messages']
+            messages = f'{data["messages"]} / {data["messages_unacknowledged"]}'
             unknown = 0
             errors = 0
 
           if queue in queues:
             if consumers != 0:
               queues[queue]['consumers'] = consumers
-            if messages != 0:
+            if messages:
               queues[queue]['messages'] = messages
             if errors != 0:
               queues[queue]['errors'] = errors
