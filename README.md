@@ -7,10 +7,14 @@ processing has three (maye four) steps:
 - run uiuc-pipeline to process the downloaded image
 - upload the processed image back to CDR.
 
-To use this application you need to first copy env.example to .env and modify the values. You will
-at least need to set `SERVER_NAME` and `CDR_TOKEN`.
+To use this application you need to first copy env.example to .env and modify the values. You 
+will at least need to set `SERVER_NAME` and `CDR_TOKEN`.
 
-The unregister.sh script can be used to remove any hanging registrations with CDR, and the versions.sh
-script can be used to set the version for the cdr-hook application.
+The unregister.sh script can be used to remove any hanging registrations with CDR, and the
+versions.sh script can be used to set the version for the cdr-hook application.
 
-This also contains a simple monitor to see the number of messages in the queue that still need processing.
+This also contains a simple monitor to see the number of messages in the queue that still need
+processing.
+
+By default `docker compose up` will only start the cdrhook, rabbitmq and traefik. To run the
+full stack use: `docker compose --profile pipeline up -d`

@@ -1,0 +1,82 @@
+# save this as docker-compose.override.yml to override the default docker-compose.yml
+
+services:
+  # show the traefik dashboard
+  traefik:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`${SERVER_NAME}`)"
+      - "traefik.http.routers.api.service=api@internal"
+
+  # keep all events, good for debugging
+  cdrhook:
+    environment:
+      CDR_KEEP_EVENT: "yes"
+      PREFIX: ""
+
+  # simple filebrower to browse all the data downloaded
+  filebrowser:
+    image: hurlenko/filebrowser
+    volumes:
+      - "filebrowser:/data"
+      - "data:/data/data"
+      - "logs:/data/logs"
+      - "output:/data/output"
+      - "feedback:/data/feedback"
+    environment:
+      - FB_BASEURL=/filebrowser
+      - FB_NOAUTH=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.filebrowser.rule=Host(`${SERVER_NAME}`) && PathPrefix(`/filebrowser`)"
+
+  # open rabbitmq to the internet
+  rabbitmq:
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+# map volumes to paths on disk, not inside docker
+volumes:
+  traefik:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/traefik
+      o: bind
+  rabbitmq:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/rabbitmq
+      o: bind
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/data
+      o: bind
+  logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/logs
+      o: bind
+  output:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/output
+      o: bind
+  feedback:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/feedback
+      o: bind
+  filebrowser:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/filebrowser
+      o: bind
