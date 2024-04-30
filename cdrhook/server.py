@@ -177,7 +177,7 @@ def hook():
 
 
 @auth.login_required
-def donwload(filename):
+def download(filename):
     """
     download the file
     """
@@ -306,7 +306,7 @@ def create_app():
     # register the hook
     path = urllib.parse.urlparse(config["callback_url"]).path
     app.route(os.path.join(path, "hook"), methods=['POST'])(hook)
-    app.route(os.path.join(path, "download", "<path:filename>"), methods=['GET'])(donwload)
+    app.route(os.path.join(path, "download", "<path:filename>"), methods=['GET'])(download)
 
     # start daemon thread for rabbitmq
     thread = threading.Thread(target=cdrhook_listener, args=(config,))
