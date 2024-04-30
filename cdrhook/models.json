@@ -1,0 +1,5 @@
+{
+    "golden_muscat": ["map_area", "polygon_legend_area"],
+    "flat_iceberg": ["map_area", "line_point_legend"],
+    "drab_volcano": ["map_area"]
+}
