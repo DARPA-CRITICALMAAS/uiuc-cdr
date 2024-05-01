@@ -23,7 +23,7 @@ jobs:
           - monitor
         include:
           - name: cdrhook
-            FOLDER: server
+            FOLDER: cdrhook
             PLATFORM: "linux/amd64,linux/arm64"
             IMAGE: criticalmaas-cdr
           - name: uploader

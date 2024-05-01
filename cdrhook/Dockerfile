@@ -15,6 +15,8 @@ ENV PYTHONUNBUFFERED=1 \
     RABBITMQ_URI="amqp://guest:guest@localhost:5672/%2F" \
     PREFIX=""
 
+VOLUME /data
+
 COPY requirements.txt ./
 RUN pip install -r ./requirements.txt
 

@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.0] - 2024-04-29
+
+This is a big change, instead of listening to `map.process` events we now listen for updates from
+uncharted that has map_area, polygon_legend_area and line_point_legend_area data. Based on this the
+system will trigger download messages.
+
+### Added
+- download endpoint to cdr to download cog_area json files from uncharted
+
+### Changed
+- new logic on when to trigger download message and for what model.
+- server now uses /cdr/ as prefix to the hook/download code
+
 ## [0.4.0] - 2024-04-29
 
 ### Added
@@ -12,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - renamed server folder to cdrhook
 - monitor shows number of messages processing, "61 / 1" means 61 messages waiting, 1 being processed
+- both uploader and pipeline are now part of profile pipeline
 
 ### Fixed
 - RabbitMQ is now pinned to v3.13
