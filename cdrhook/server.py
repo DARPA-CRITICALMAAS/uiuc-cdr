@@ -171,7 +171,7 @@ def hook():
     # check the signature
     if request.headers.get("x-cdr-signature-256"):
        validate_request(request.data, request.headers.get("x-cdr-signature-256"), config["callback_secret"])
-    elif not request.headers.get("x-cdr-signature-256") == config["callback_secret"]:
+    elif not request.headers.get("x-ncsa-secret") == config["callback_secret"]:
         abort(403, "Request signatures didn't match!")
 
     send_message(request.get_json(), f'{config["prefix"]}cdrhook')
