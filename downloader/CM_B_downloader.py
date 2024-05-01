@@ -124,22 +124,16 @@ def CDR_download_callback(ch, method, properties, body):
     #        outgoing_message_dictionary={'request_type': "input_file" , 'input_file': CDR_catalog['cog_url'] , 'input_dir': my_input_dir, 'output_dir': my_output_dir, 'model': model_to_process, 'pipeline_image': my_pipeline_image, 'log_dir': my_log_dir}
     #        outgoing_message_dictionary={'request_type': "input_file" , 'input_file': CDR_catalog['cog_url'] , 'input_dir': my_input_dir, 'output_dir': my_output_dir, 'model': model_to_process, 'log_dir': my_log_dir, 'cog_id': CDR_catalog['cog_id'], 'metadata': CDR_catalog['metadata'], 'results': CDR_catalog['results'] }
 
-    # copy over the incoming dictionary; we pass it through to all the processing queues
-    # without modifying what's already there
-    # although we do add one entry for simplicity
-#    outgoing_message_dictionary["filename"]=tif_filename_with_path
+    # Pass whole catalog on, with additions to make the inference pipeline work
+    outgoing_message_dictionary=CDR_catalog;
+    outgoing_message_dictionary["image_filename"]=tif_filename_with_path
+    outgoing_message_dictionary["json_filename"]=maparea_filename_with_path
     
     # then send out processing requests
 #    for model_to_process in process_model_list:
     for model_to_process in CDR_model_list:
         my_process_queue = process_queue_base+model_to_process
 
-        outgoing_message_dictionary=CDR_catalog;
-        if model_to_process == "golden_muscat":
-            outgoing_message_dictionary["filename"]=os.path.join(model_to_process,tif_filename_with_path)
-        else:
-            outgoing_message_dictionary["filename"]=os.path.join(model_to_process,maparea_filename_with_path)
-            
         outgoing_message=json.dumps(outgoing_message_dictionary)
         print("About to send process message:")
         print(outgoing_message)
