@@ -169,8 +169,8 @@ def hook():
     Our main entry point for CDR calls
     """
     # check the signature
-    if request.headers.get("x-cdr-signature-256"):
-        validate_request(request.data, request.headers.get("x-cdr-signature-256"), config["callback_secret"])
+    #if request.headers.get("x-cdr-signature-256"):
+    validate_request(request.data, request.headers.get("x-cdr-signature-256"), config["callback_secret"])
 
     send_message(request.get_json(), f'{config["prefix"]}cdrhook')
     return {"ok": "success"}
