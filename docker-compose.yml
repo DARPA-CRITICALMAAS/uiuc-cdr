@@ -66,7 +66,7 @@ services:
       CDR_KEEP_EVENT: "no"
       SYSTEM_NAME: ${SYSTEM_NAME}
       SYSTEM_VERSION: ${SYSTEM_VERSION}
-      CALLBACK_URL: "https://${SERVER_NAME}${CALLBACK_PATH}"
+      CALLBACK_URL: "https://${SERVER_NAME}/cdr"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
       CALLBACK_PASSWORD: "${CALLBACK_PASSWORD}"
@@ -74,7 +74,9 @@ services:
       PREFIX: ""
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cdrhook.rule=Host(`${SERVER_NAME}`) && PathPrefix(`${CALLBACK_PATH}`)"
+      - "traefik.http.routers.cdrhook.rule=Host(`${SERVER_NAME}`) && PathPrefix(`/cdr`)"
+    volumes:
+      - cdrhook:/data
 
   # ----------------------------------------------------------------------
   # RABBITMQ MONITOR
@@ -152,6 +154,7 @@ services:
 volumes:
   traefik:
   rabbitmq:
+  cdrhook:
   feedback:
   data:
   logs:
