@@ -5,7 +5,7 @@ import json
 # configuration options; should come from environment variables or something
 # this is the base of the working directory in the main (non-image) parallel
 # file system
-my_data_dir="/projects/bbym/shared/CDR_processing/pipeline_processing_002"
+my_data_dir="/projects/bbym/shared/CDR_processing/pipeline_processing_003"
 
 print("")
 print("CriticaMAAS B-stage downloader")
@@ -243,7 +243,7 @@ def main(argv):
 # apptainer run --nv -B ./logs:/logs  -B /projects/bbym/saxton/MockValData/:/data -B ./output:/output /projects/bbym/shared/continerExchange/criticalmaas-pipeline_latest.sif -v --log /logs/logs.latest --data /data/theFile.tif --legends /data/theFile.json
 # added: --model flat_iceberg    
 #
-# apptainer run --nv -B ./logs:/logs  -B /projects/bbym/saxton/MockValData/:/data -B ./output:/output /projects/bbym/shared/continerExchange/criticalmaas-pipeline_latest.sif -v --log /logs/logs.latest --data /data --legends /data
+# apptainer run --nv -B ./logs:/logs  -B /projects/bbym/saxton/MockValData/:/data -B ./output:/output /projects/bbym
 
 
 
