@@ -77,7 +77,9 @@ def CDR_download_callback(ch, method, properties, body):
     
     # download the file first
     # (perhaps to be replaced by more python-y alternative from Rob)
-    file_URL=CDR_catalog['cog_url']
+    tif_file_URL=CDR_catalog['cog_url']
+    maparea_file_URL=CDR_catalog['map_area']
+    CDR_model_list=CDR_catalog['models']
     my_cog_id=CDR_catalog['cog_id']
 
     # we split the target into intermediate directories to avoid pileup of tons
@@ -92,18 +94,27 @@ def CDR_download_callback(ch, method, properties, body):
     # the total path in the image where the data is reference from
     #    image_data_path=os.path.join(image_data_base_dir_absolute,extended_split_path)
     external_data_path=os.path.join(external_data_base_dir_relative,extended_split_path)
-    data_file_name=my_cog_id+".cog.tif"
-
+    tif_data_file_name=my_cog_id+".cog.tif"
+    maparea_data_file_name=my_cog_id+".cog_area.json"
+    
     # this is the location of the data file within the container, relative to its canonical folder (probably "/data")
-    #    image_data_filename_with_path=os.path.join(image_data_path,data_file_name)
-    image_data_filename_with_path=os.path.join(extended_split_path,data_file_name)
-    external_data_filename_with_path=os.path.join(external_data_path,data_file_name)
+    #    tif_filename_with_path=os.path.join(image_data_path,tif_data_file_name)
+    tif_filename_with_path=os.path.join(extended_split_path,tif_data_file_name)
+    maparea_filename_with_path=os.path.join(extended_split_path,maparea_data_file_name)
     
-    
-    DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; wget "+file_URL
-    print("about to run download command: "+DL_command)
-    os.system(DL_command)
-    print("finished download command")
+    #    external_data_filename_with_path=os.path.join(external_data_path,tif_data_file_name)
+
+    if maparea_file_URL:
+        DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; wget "+maparea_file_URL
+        print("about to run maparea download command: "+DL_command)
+        os.system(DL_command)
+        print("finished maparea download command")
+
+    if tif_file_URL:
+        DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; wget "+tif_file_URL
+        print("about to run tif download command: "+DL_command)
+        os.system(DL_command)
+        print("finished tif download command")
 
     # set up message; the message is only specific to the request file, not to
     # the model, so we can set up a message to be sent to all of the processing
@@ -115,14 +126,20 @@ def CDR_download_callback(ch, method, properties, body):
 
     # copy over the incoming dictionary; we pass it through to all the processing queues
     # without modifying what's already there
-    outgoing_message_dictionary=CDR_catalog;
     # although we do add one entry for simplicity
-    outgoing_message_dictionary["filename"]=image_data_filename_with_path
+#    outgoing_message_dictionary["filename"]=tif_filename_with_path
     
     # then send out processing requests
-    for model_to_process in process_model_list:
+#    for model_to_process in process_model_list:
+    for model_to_process in CDR_model_list:
         my_process_queue = process_queue_base+model_to_process
 
+        outgoing_message_dictionary=CDR_catalog;
+        if model_to_process == "golden_muscat":
+            outgoing_message_dictionary["filename"]=os.path.join(model_to_process,tif_filename_with_path)
+        else:
+            outgoing_message_dictionary["filename"]=os.path.join(model_to_process,maparea_filename_with_path)
+            
         outgoing_message=json.dumps(outgoing_message_dictionary)
         print("About to send process message:")
         print(outgoing_message)
