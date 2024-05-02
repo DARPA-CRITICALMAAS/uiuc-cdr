@@ -24,6 +24,7 @@ class Worker(threading.Thread):
         self.properties = properties
         self.body = body
         self.exception = None
+        self.result = None
 
     def run(self):
         try:
@@ -34,15 +35,9 @@ class Worker(threading.Thread):
             if os.path.getsize(file) > max_size * 1024 * 1024:  # size in bytes
                 raise ValueError(f"File {file} is larger than {max_size}MB, skipping upload.")
             headers = {'Authorization': f'Bearer {cdr_token}', 'Content-Type': 'application/json'}
-            with open(file, 'rb') as f:
-                cdr_data = json.load(f)
-            # TODO this needs to be in pipeline.py
-            cdr_data['cog_id'] = data['cog_id']
-            cdr_data['system'] = data['system']
-            cdr_data['system_version'] = data['version']
-            response = requests.post(f'{cdr_url}/v1/maps/publish/features', data=json.dumps(cdr_data), headers=headers)
-            logging.debug(response.text)
+            response = requests.post(f'{cdr_url}/v1/maps/publish/features', data=open(file, rb), headers=headers)
             response.raise_for_status()
+            result = response.text
         except RequestException as e:
             logging.exception(f"Request Error {response.text}.")
             self.exception = e
@@ -63,6 +58,7 @@ def main():
     # create queues
     channel.queue_declare(queue=f"{prefix}upload", durable=True)
     channel.queue_declare(queue=f"{prefix}upload.error", durable=True)
+    channel.queue_declare(queue=f"{prefix}completed", durable=True)
 
     # listen for messages and stop if nothing found after 5 minutes
     channel.basic_qos(prefetch_count=1)
@@ -86,6 +82,8 @@ def main():
                     channel.basic_publish(exchange='', routing_key=f"{prefix}upload.error", body=json.dumps(data), properties=worker.properties)
                 else:
                     logging.info(f"Finished all processing steps for map {data['cog_id']}")
+                    data['result'] = worker.result
+                    channel.basic_publish(exchange='', routing_key=f"{prefix}completed", body=json.dumps(data), properties=worker.properties)
                 channel.basic_ack(delivery_tag=worker.method.delivery_tag)
                 worker = None
 

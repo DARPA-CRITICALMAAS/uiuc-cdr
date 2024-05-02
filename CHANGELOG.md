@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6.0] - 2024-05-01
+
+### Added
+- uploaded results are stored in a completed queue
+
+### Changed
+- uploader no longer changes the system_name and version
+
 ## [0.5.0] - 2024-04-29
 
 This is a big change, instead of listening to `map.process` events we now listen for updates from
