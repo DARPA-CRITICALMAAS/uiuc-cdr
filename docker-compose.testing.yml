@@ -13,6 +13,9 @@ services:
     environment:
       CDR_KEEP_EVENT: "yes"
       PREFIX: ""
+      # set these if you set them in your .env file
+      #SYSTEM_NAME: ${SYSTEM_NAME}
+      #SYSTEM_VERSION: ${SYSTEM_VERSION}
 
   # simple filebrower to browse all the data downloaded
   filebrowser:

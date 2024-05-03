@@ -64,8 +64,6 @@ services:
     environment:
       CDR_TOKEN: "${CDR_TOKEN}"
       CDR_KEEP_EVENT: "no"
-      SYSTEM_NAME: ${SYSTEM_NAME}
-      SYSTEM_VERSION: ${SYSTEM_VERSION}
       CALLBACK_URL: "https://${SERVER_NAME}/cdr"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
