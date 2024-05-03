@@ -207,7 +207,6 @@ def cdrhook_callback(channel, method, properties, body):
                 check_uncharted_event(event_id)
             else:
                 logging.debug(f"Ignoring feature.process with id {event_id}")
-                logging.debug(data)
         else:
             logging.debug("Unknown event %s", data.get("event"))
         
