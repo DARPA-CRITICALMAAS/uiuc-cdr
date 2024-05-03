@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.0] - 2024-05-03
+
+### Fixed
+- cdrhook: restart rabbitmq listener in case of error
+- cdrhook: in case of exception processing event move to error queue
+- cdrhook: strip whitespaces from event id
+
 ## [0.6.0] - 2024-05-01
 
 ### Added
