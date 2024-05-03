@@ -3,9 +3,10 @@ FROM python:3.11
 WORKDIR /app
 EXPOSE 8080
 
+ARG VERSION="unknown"
 ENV PYTHONUNBUFFERED=1 \
     SYSTEM_NAME="ncsa" \
-    SYSTEM_VERSION="0.3.0" \
+    SYSTEM_VERSION="${VERSION}" \
     CDR_TOKEN="" \
     CDR_KEEP_EVENT="no" \
     CALLBACK_SECRET="this_is_a_really_silly_secret" \
