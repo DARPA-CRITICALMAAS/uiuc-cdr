@@ -36,7 +36,7 @@ class Worker(threading.Thread):
                 if not os.path.exists(file):
                     time.sleep(1)
                     if not os.path.exists(file):
-                        print(f"ERROR!  File {file} does not exist for uploader even after a wait!")
+                        logging.exception(f"ERROR!  File {file} does not exist for uploader even after a wait!")
                         raise ValueError(f"File {file} does not exist for uploader!!!")                        
             # only upload if less than certain size
             if os.path.getsize(file) > max_size * 1024 * 1024:  # size in bytes
