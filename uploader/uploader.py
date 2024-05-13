@@ -5,6 +5,7 @@ import pika
 import requests
 from requests.exceptions import RequestException
 import threading
+import time
 
 # rabbitmq uri
 rabbitmq_uri = os.getenv("RABBITMQ_URI", "amqp://guest:guest@localhost:5672/%2F")
@@ -30,6 +31,13 @@ class Worker(threading.Thread):
             data = json.loads(self.body)
             file = os.path.join("/output", data['cdr_output'])
             logging.debug(f"Uploading data for {data['cog_id']} from {file}")
+            if not os.path.exists(file):
+                time.sleep(.1)
+                if not os.path.exists(file):
+                    time.sleep(1)
+                    if not os.path.exists(file):
+                        print(f"ERROR!  File {file} does not exist for uploader even after a wait!")
+                        raise ValueError(f"File {file} does not exist for uploader!!!")                        
             # only upload if less than certain size
             if os.path.getsize(file) > max_size * 1024 * 1024:  # size in bytes
                 raise ValueError(f"File {file} is larger than {max_size}MB, skipping upload.")
