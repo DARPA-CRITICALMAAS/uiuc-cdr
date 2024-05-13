@@ -74,6 +74,7 @@ jobs:
 
       # login to registries
       - name: Login to DockerHub
+        if: ${{ github.repository == 'DARPA-CRITICALMAAS/uiuc-cdr' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -92,7 +93,7 @@ jobs:
         with:
           context: ${{ matrix.FOLDER }}
           #push: ${{ github.event_name != 'pull_request' }}
-          push: true
+          push: ${{ github.repository == 'DARPA-CRITICALMAAS/uiuc-cdr' }}
           platforms: ${{ matrix.PLATFORM }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
