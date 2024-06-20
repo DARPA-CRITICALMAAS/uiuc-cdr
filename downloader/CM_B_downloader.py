@@ -1,5 +1,6 @@
 import pika, sys, getopt, os
 import json
+import time
 #import argparse
 
 # configuration options; should come from environment variables or something
@@ -112,9 +113,16 @@ def CDR_download_callback(ch, method, properties, body):
 
     if tif_file_URL:
         DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; wget "+tif_file_URL
-        print("about to run tif download command: "+DL_command)
-        os.system(DL_command)
-        print("finished tif download command")
+        # check for file before downloading
+        fetch_file_path=os.path.join(my_data_dir,external_data_path);
+        fetch_file_components=tif_file_URL.split("/")
+        fetch_file_total_path=os.path.join(fetch_file_path,fetch_file_components[-1])
+        if os.path.isfile(fetch_file_total_path):
+            print(f"File >{fetch_file_total_path}< already exists!  Skipping download.")
+        else:
+            print("about to run tif download command: "+DL_command)
+            os.system(DL_command)
+            print("finished tif download command")
 
     # set up message; the message is only specific to the request file, not to
     # the model, so we can set up a message to be sent to all of the processing
@@ -130,7 +138,7 @@ def CDR_download_callback(ch, method, properties, body):
     outgoing_message_dictionary["json_filename"]=maparea_filename_with_path
     
     # then send out processing requests
-#    for model_to_process in process_model_list:
+    #    for model_to_process in process_model_list:
     for model_to_process in CDR_model_list:
         my_process_queue = process_queue_base+model_to_process
 
@@ -147,13 +155,14 @@ def CDR_download_callback(ch, method, properties, body):
 
     # exit after a single message processing for testing
 #    sys.exit(2)
-    
+    print("pausing")
+    time.sleep(5)
 
         
         
-#    result_file=input_dir+my_catalog['map_id']+".cog.tif"
-#    print("input dir:"+input_dir)
-#    print("resulting file: "+result_file)
+    #    result_file=input_dir+my_catalog['map_id']+".cog.tif"
+    #    print("input dir:"+input_dir)
+    #    print("resulting file: "+result_file)
     
         
 
