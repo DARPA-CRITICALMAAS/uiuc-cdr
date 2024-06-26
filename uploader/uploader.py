@@ -31,7 +31,12 @@ class Worker(threading.Thread):
             data = json.loads(self.body)
             file = os.path.join("/output", data['cdr_output'])
             logging.debug(f"Uploading data for {data['cog_id']} from {file}")
-            if not os.path.exists(file):
+            counter = 0
+            while not os.path.exists(file):
+                counter = counter + 1
+                if counter > 2: # maybe make a variable above
+                    raise ValueError(f"File {file} does not exist for uploader!!!")  
+                time.sleep(1)
                 time.sleep(.1)
                 if not os.path.exists(file):
                     time.sleep(1)
