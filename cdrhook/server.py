@@ -145,6 +145,128 @@ def check_uncharted_event(event_id):
     send_message(message, f'{config["prefix"]}download')
 
 
+def process_cog(cog_id):
+    """
+    Check to see if we have all the information for the cog. If we do then
+    write it to a temporary file and fire the download event.
+    """
+    headers = {'Authorization': f'Bearer {config["cdr_token"]}'}
+
+    # create the result
+    result = {
+        "system": "ncsa",
+        "system_version": "0.0.0",
+        "cog_id": cog_id,
+        "line_feature_results": [ ],
+        "point_feature_results": [ ],
+        "polygon_feature_results": [ ],
+        "cog_area_extractions": [ ],
+        "cog_metadata_extractions": [ ]
+    }
+
+    # get the system information for map area (area_extraction)
+    r = requests.get(f"{cdr_url}/v1/features/{cog_id}/system_versions?type=area_extraction", headers=headers)
+    r.raise_for_status()
+    data = r.json()
+    logging.debug("Got system versions for area_extraction : %s", data)
+
+    # check if there is a map area
+    system = None
+    for version in data:
+        if version[0] == "uncharted":
+            system = version
+    if system:
+        logging.debug(f"MapArea found from {system[0]} version {system[1]}")
+    else:
+        logging.debug("No map area found")
+
+    # download map area
+    map_area = [ ]
+    if system:
+        r = requests.get(f"{cdr_url}/v1/features/{cog_id}/area_extractions?system_version={system[0]}__{system[1]}", headers=headers)
+        r.raise_for_status()
+        for item in r.json():
+            if item["system"] != system[0] or item["system_version"] != system[1]:
+                continue
+            if item["category"] == "map_area":
+                map_area.append(item)
+        result["cog_area_extractions"].extend(map_area)
+
+    # get the system information for legends
+    r = requests.get(f"{cdr_url}/v1/features/{cog_id}/system_versions?type=legend_item", headers=headers)
+    r.raise_for_status()
+    data = r.json()
+    logging.debug("Got system versions legend_item : %s", data)
+
+    # check if there is a legend
+    system = None
+    for version in data:
+        if version[0] == "polymer":
+            system = version
+    if not system:
+        for version in data:
+            if version[0] == "uncharted":
+                system = version
+    if system:
+        logging.debug(f"Legend found from {system[0]} version {system[1]}")
+    else:
+        logging.debug("No legend found")
+
+    # download legend
+    polygon_legend_area = [ ]
+    line_point_legend_area = [ ]
+    if system:
+        r = requests.get(f"{cdr_url}/v1/features/{cog_id}/legend_items?system_version={system[0]}__{system[1]}", headers=headers)
+        r.raise_for_status()
+        # legend does not have any filtering, so we do it locally as well as extract the polygons/point_line
+        for item in r.json():
+            if item["system"] != system[0] or item["system_version"] != system[1]:
+                continue
+            if item["category"] == "line_point_legend_area":
+                line_point_legend_area.append(item)
+            elif item["category"] == "polygon":
+                polygon_legend_area.append(item)
+        result["cog_area_extractions"].extend(polygon_legend_area)
+        result["cog_area_extractions"].extend(line_point_legend_area)
+
+    # write the cog_area to disk
+    folder = os.path.join(cog_id[0:2], cog_id[2:4])
+    filepart = os.path.join(folder, cog_id)
+    filename = os.path.join("/data", f"{filepart}.cog_area.json")
+    os.makedirs(os.path.dirname(filename) , exist_ok=True)
+    with open(filename, "w") as outputfile:
+        json.dump(result, outputfile)
+
+    # get the basic information
+    r = requests.get(f"{cdr_url}/v1/maps/cog/{cog_id}", headers=headers)
+    r.raise_for_status()
+    cog_info = r.json()
+
+    # send the download event
+    firemodels = [ ] 
+    for k, v in config["models"].items():
+        goodmodel = True
+        if "map_area" in v and not map_area:
+            logging.debug("Skipping %s because of map_area", k)
+            goodmodel = False
+        if "polygon_legend_area" in v and not polygon_legend_area:
+            logging.debug("Skipping %s because of polygon_legend_area", k)
+            goodmodel = False
+        if "line_point_legend_area" in v and not line_point_legend_area:
+            logging.debug("Skipping %s because of line_point_legend_area", k)
+            goodmodel = False
+        if goodmodel:
+            firemodels.append(k)
+
+    message = {
+        "cog_id": cog_id,
+        "cog_url": cog_info["cog_url"],
+        "map_area": f'{config["callback_url"]}/download/{filepart}.cog_area.json',
+        "models": firemodels
+    }
+    logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
+    send_message(message, f'{config["prefix"]}download')
+
 # ----------------------------------------------------------------------
 # Process incoming requests
 # ----------------------------------------------------------------------
@@ -176,6 +298,17 @@ def hook():
 
 
 @auth.login_required
+def cog(id):
+    """
+    Process the cog
+    """
+    logging.info(f"Received process cog for {id}")
+    send_message({"event": "ncsacog", "cog_id": id}, f'{config["prefix"]}cdrhook')
+
+    return {"ok": "success"}
+
+
+@auth.login_required
 def download(filename):
     """
     download the file
@@ -199,6 +332,9 @@ def cdrhook_callback(channel, method, properties, body):
             logging.error("No event in message")
         elif data.get("event") == "ping":
             logging.debug("ping/pong")
+        elif data.get("event") == "ncsacog":
+            cog_id = data.get("cog_id", "").strip()
+            process_cog(cog_id)
         elif data.get("event") == "map.process":
             logging.debug("ignoring map.process")
         elif data.get("event") == "feature.process":
@@ -315,6 +451,7 @@ def create_app():
     path = urllib.parse.urlparse(config["callback_url"]).path
     app.route(os.path.join(path, "hook"), methods=['POST'])(hook)
     app.route(os.path.join(path, "download", "<path:filename>"), methods=['GET'])(download)
+    app.route(os.path.join(path, "cog", "<string:id>"), methods=['POST'])(cog)
 
     # start daemon thread for rabbitmq
     thread = threading.Thread(target=cdrhook_listener, args=(config,))
