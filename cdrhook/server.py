@@ -161,6 +161,7 @@ def process_cog(cog_id):
         "point_feature_results": [ ],
         "polygon_feature_results": [ ],
         "cog_area_extractions": [ ],
+        "cog_legend_items": [ ],
         "cog_metadata_extractions": [ ]
     }
 
@@ -226,8 +227,8 @@ def process_cog(cog_id):
                 line_point_legend_area.append(item)
             elif item["category"] == "polygon":
                 polygon_legend_area.append(item)
-        result["cog_area_extractions"].extend(polygon_legend_area)
-        result["cog_area_extractions"].extend(line_point_legend_area)
+        result["cog_legend_items"].extend(polygon_legend_area)
+        result["cog_legend_items"].extend(line_point_legend_area)
 
     # write the cog_area to disk
     folder = os.path.join(cog_id[0:2], cog_id[2:4])
