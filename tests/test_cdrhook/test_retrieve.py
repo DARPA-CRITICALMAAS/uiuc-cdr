@@ -16,7 +16,7 @@ class TestRetrieve:
         system_version = '0.1'
         token = os.getenv('CDR_TOKEN')
         callback_url = 'https://criticalmaas.ncsa.illinois.edu'
-        self.con = CdrConnector(system_name, system_version, token, callback_url)
+        self.con = CdrConnector(system_name=system_name, system_version=system_version, token=token, callback_url=callback_url)
         self.con.register()
 
     def test_retrieve_cog_metadata(self):
