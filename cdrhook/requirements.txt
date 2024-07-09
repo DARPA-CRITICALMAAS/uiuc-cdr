@@ -3,7 +3,7 @@ waitress
 flask_httpauth
 requests
 pika
-dotenv
+python-dotenv 
 pydantic
 geopandas
 rasterio
