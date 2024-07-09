@@ -4,9 +4,6 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, AnyUrl
 
 class CdrConnector(BaseModel):
-    cdr_url : AnyUrl = Field(
-        default="https://api.cdr.land",
-        description="The URL of the CDR API")
     system_name : str = Field(
         description="The name of the system registering with the CDR")
     system_version : str = Field(
@@ -27,6 +24,9 @@ class CdrConnector(BaseModel):
     events : List[str] = Field(
         default_factory=list,
         description="The events to register for, leaving blank will register for all events")
+    cdr_url : AnyUrl = Field(
+        default="https://api.cdr.land",
+        description="The URL of the CDR API")
     registration : Optional[str] = Field(
         default=None,
         description="The registration ID returned by the CDR")
