@@ -50,7 +50,7 @@ class CdrConnector(BaseModel):
         logging.debug(r.text)
         r.raise_for_status()
         self.registration = r.json()["id"]
-        logging.info(f"Registered with CDR, id : {self.registration}")
+        logging.info(f"Registered with CDR, registration id : {self.registration}")
         return r.json()["id"]
     
     def unregister(self):

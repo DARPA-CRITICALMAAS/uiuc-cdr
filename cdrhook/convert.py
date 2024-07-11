@@ -1,5 +1,7 @@
 from typing import List
-from cdrhook.cdr_endpoint_schemas import AreaExtractionsEndpoint, LegendItemsEndpoint, MetadataEndpoint
+from cdrhook.cdr_endpoint_schemas import CogMetadataSchema
+from cdr_schemas.cdr_responses.legend_items import LegendItemResponse
+from cdr_schemas.cdr_responses.area_extractions import AreaExtractionResponse
 from cmaas_utils.types import Legend, MapUnit, MapUnitType, Layout, CMAAS_MapMetadata, Provenance
 
 # This would require a lot of effort to convert and don't think it will be used. 
@@ -10,7 +12,7 @@ from cmaas_utils.types import Legend, MapUnit, MapUnitType, Layout, CMAAS_MapMet
 #     map_data.legend = 
 #     return
 
-def convert_cdr_schema_metadata_to_cmass_map_metadata(cdr_metadata:MetadataEndpoint) -> CMAAS_MapMetadata:
+def convert_cdr_schema_metadata_to_cmass_map_metadata(cdr_metadata:CogMetadataSchema) -> CMAAS_MapMetadata:
     map_metadata = CMAAS_MapMetadata(provenance=Provenance(name='CDR', version='0.3.3'))
     map_metadata.title = cdr_metadata.cog_name
     map_metadata.authors = cdr_metadata.authors
@@ -23,7 +25,7 @@ def convert_cdr_schema_metadata_to_cmass_map_metadata(cdr_metadata:MetadataEndpo
     #map_metadata.physiographic_region 
     return map_metadata
 
-def convert_cdr_schema_legend_items_to_cmass_legend(cdr_legend:List[LegendItemsEndpoint]) -> Legend:
+def convert_cdr_schema_legend_items_to_cmass_legend(cdr_legend:List[LegendItemResponse]) -> Legend:
     legend = Legend(provenance=Provenance(name=cdr_legend[0].system, version=cdr_legend[0].system_version))    
     for item in cdr_legend:
         map_unit = MapUnit(type=MapUnitType.from_str(item.category.lower()))
@@ -37,7 +39,7 @@ def convert_cdr_schema_legend_items_to_cmass_legend(cdr_legend:List[LegendItemsE
         legend.features.append(map_unit)
     return legend
 
-def convert_cdr_schema_area_extraction_to_layout(cdr_area_extraction:List[AreaExtractionsEndpoint]) -> Layout:
+def convert_cdr_schema_area_extraction_to_layout(cdr_area_extraction:List[AreaExtractionResponse]) -> Layout:
     layout = Layout(provenance=Provenance(name=cdr_area_extraction[0].system, version=cdr_area_extraction[0].system_version))
     for area in cdr_area_extraction:
         if area.category == 'map_area':

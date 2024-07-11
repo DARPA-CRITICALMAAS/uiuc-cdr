@@ -1,70 +1,36 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-# Returned by cog_system_versions endpoint
+# # Returned by cog_system_versions endpoint
 class SystemId(BaseModel):
-    name: str
-    version: str
+    """
+    The system ID tuple used by the CDR to identify the provence of a peice of data.
+    System versions endpoint returns a list of these.
+    """
+    name: str = Field(description="The name of the system")
+    version: str = Field(description="The version of the system")
 
-class SystemVersionsEndpoint(BaseModel):
+class CogSystemVersionsSchema(BaseModel):
+    """
+    The response schema from the CDR cog system versions endpoint.
+    """
     system_versions: List[SystemId]
 
-# Returned by cog_area_extraction endpoint
-class AreaExtractionCoords(BaseModel):
+    def pretty_str(self):
+        """
+        Return a pretty string representation of the system versions.
+        """
+        outstr = "CogSystemVersionsSchema(\n"
+        outstr += "\n".join([f"\t{s.name} - {s.version}," for s in self.system_versions])[:-1]
+        outstr += "\n)"
+        return outstr
+
+# # Returned by cog_metadata endpoint
+class GeoJsonCoord(BaseModel):
     type: str
     coordinates: List[List[List[float]]]
 
-class AreaExtractionsEndpoint(BaseModel):
-    area_extraction_id : str
-    cog_id: str
-    reference_id: str
-    px_bbox : List[float]
-    px_geojson : AreaExtractionCoords
-    system :str
-    system_version :str
-    model_id : str
-    validated : bool
-    confidence : Optional[float] = None
-    category : str
-    text : str
-    projected_feature : List[str]
-
-# Returned by cog_legend_items endpoint
-class PxGeojson(BaseModel):
-    type: str
-    coordinates: List = []
-    
-class LegendItemsEndpoint(BaseModel):
-    legend_id: str
-    abbreviation: str
-    description: str
-    color: str
-    reference_id: str
-    label: str
-    pattern: str
-    px_bbox: List = []
-    px_geojson: PxGeojson
-    cog_id: str
-    category: str
-    system: str
-    system_version: str
-    _model_id: str
-    validated: bool
-    confidence: Optional[float] = None
-    map_unit_age_text: str
-    map_unit_lithology: str
-    map_unit_b_age: Optional[float] = None
-    map_unit_t_age: Optional[float] = None
-    point_extractions: List = []
-    polygon_extractions: List = []
-    line_extractions: List = []
-
-# Returned by cog_metadata endpoint
-class BestBoundsGeoJson(BaseModel):
-    type: str
-    coordinates: List[List[List[float]]]
-
-class MetadataEndpoint(BaseModel):
+class CogMetadataSchema(BaseModel):
     citation: str
     ngmdb_prod: str
     scale: int
@@ -87,8 +53,28 @@ class MetadataEndpoint(BaseModel):
     quadrangle: Optional[str]
     alternate_name: str
     keywords: List[str]
-    best_bounds_geojson: BestBoundsGeoJson
+    best_bounds_geojson: GeoJsonCoord
     georeferenced_count : int
     validated_count : int
 
-# Map results endpoint is a cdr_schema map_result
+# Area extraction
+#     def pretty_str(self):
+#         """
+#         Return a pretty string representation of the area extraction.
+#         """
+#         outstr = "CogAreaExtractionsSchema(\n"
+#         outstr += f"\tarea_extraction_id: {self.area_extraction_id},\n"
+#         outstr += f"\tcog_id: {self.cog_id},\n"
+#         outstr += f"\treference_id: {self.reference_id},\n"
+#         outstr += f"\tpx_bbox: {self.px_bbox},\n"
+#         outstr += f"\tpx_geojson: {self.px_geojson},\n"
+#         outstr += f"\tsystem: {self.system},\n"
+#         outstr += f"\tsystem_version: {self.system_version},\n"
+#         outstr += f"\tmodel_id: {self.model_id},\n"
+#         outstr += f"\tvalidated: {self.validated},\n"
+#         outstr += f"\tconfidence: {self.confidence},\n"
+#         outstr += f"\tcategory: {self.category},\n"
+#         outstr += f"\ttext: {self.text},\n"
+#         outstr += f"\tprojected_feature: {self.projected_feature},\n"
+#         outstr += ")"
+#         return outstr
