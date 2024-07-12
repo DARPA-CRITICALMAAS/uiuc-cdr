@@ -18,6 +18,7 @@ auth = HTTPBasicAuth()
 cdr_url = "https://api.cdr.land"
 
 config = { }
+cdr_connector = None
 
 # ----------------------------------------------------------------------
 # HELPER
@@ -144,8 +145,84 @@ def check_uncharted_event(event_id):
     logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
     send_message(message, f'{config["prefix"]}download')
 
+import cdrhook.retrieve as retrieve
+import cdrhook.convert as convert
+from concurrent.futures import ThreadPoolExecutor
+from cmaas_utils.types import CMAAS_Map
+from cdr_schemas.cdr_responses.area_extractions import AreaType
+def process_cog(cdr_connector, cog_id):
+    """
+    Check to see if we have all the information for the cog. If we do then
+    write it to a temporary file and fire the download event.
+    """
+    valid_area_systems = ['uncharted']
+    valid_legend_systems = ['polymer', 'uncharted']
 
-def process_cog(cog_id):
+    logging.info(f"{cog_id[0:8]} - Processing cog {cog_id}")
+    # Retrieve cdr data for this cog
+    with ThreadPoolExecutor() as p:
+        sys_ver_future = p.submit(retrieve.retrieve_cog_system_versions, cdr_connector, cog_id)
+        area_future = p.submit(retrieve.retrieve_cog_area_extraction, cdr_connector, cog_id)
+        legend_future = p.submit(retrieve.retrieve_cog_legend_items, cdr_connector, cog_id)
+        
+        sys_ver_response = sys_ver_future.result()
+        area_response = area_future.result()
+        legend_response = legend_future.result()
+
+    # Validate responses to cdr_schema objects
+    cog_system_versions = retrieve.validate_cog_system_versions_response(sys_ver_response)
+    cog_area_extraction = retrieve.validate_cog_area_extraction_response(area_response)
+    cog_legend_items = retrieve.validate_cog_legend_items_response(legend_response)
+
+    # Filter out systems that are not valid
+    logging.info(f"{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
+    cog_area_extraction = [ae for ae in cog_area_extraction if ae.system in valid_area_systems]
+    cog_legend_items = [li for li in cog_legend_items if li.system in valid_legend_systems]
+
+    # Check there is enough data to process
+    ae_categories = {AreaType.Map_Area: 0, AreaType.Polygon_Legend_Area: 0}
+    for ae in cog_area_extraction:
+        if ae.category not in ae_categories:
+            ae_categories[ae.category] = 1
+        else:
+            ae_categories[ae.category] += 1
+    logging.info(f"{cog_id[0:8]} - Found {ae_categories}")
+    poly_map_units = [mu for mu in cog_legend_items if mu.category == 'polygon']
+    logging.info(f"{cog_id[0:8]} - Found {len(poly_map_units)} polygon map units")
+    
+    if ae_categories[AreaType.Map_Area] < 1:
+        logging.error(f"{cog_id[0:8]} - No map area found")
+        # return
+    if ae_categories[AreaType.Polygon_Legend_Area] < 1:
+        logging.error(f"{cog_id[0:8]} - No polygon legend area found")
+        # return
+    if len(poly_map_units) < 1:
+        logging.error(f"{cog_id[0:8]} - No polygon legend items found")
+        # return
+
+    if len(cog_area_extraction) == 0:
+        logging.error(f"No area extraction found for cog {cog_id}")
+        return
+    if len(cog_legend_items) == 0:
+        logging.error(f"No legend items found for cog {cog_id}")
+        return
+
+    # Convert cdr obects to cmass objects
+    layout = convert.convert_cdr_schema_area_extraction_to_layout(cog_area_extraction)
+    legend = convert.convert_cdr_schema_legend_items_to_cmass_legend(cog_legend_items)
+    map_data = CMAAS_Map(name=cog_id, cog_id=cog_id, layout=layout, legend=legend)
+
+    # write the cog_area to disk
+    # folder = os.path.join(cog_id[0:2], cog_id[2:4])
+    # filepart = os.path.join(folder, cog_id)
+    # filename = os.path.join("/data", f"{filepart}.cog_area.json")
+    filename = 'tests/logs/test_process_cog.json'
+    os.makedirs(os.path.dirname(filename) , exist_ok=True)
+    with open(filename, "w") as outputfile:
+        outputfile.write(map_data.model_dump_json())
+
+
+def _process_cog(cog_id):
     """
     Check to see if we have all the information for the cog. If we do then
     write it to a temporary file and fire the download event.
@@ -385,41 +462,41 @@ def cdrhook_listener(config):
 # ----------------------------------------------------------------------
 # Start the server and register with the CDR
 # ----------------------------------------------------------------------
-def register_system(config):
-    """
-    Register our system to the CDR using the app_settings
-    """
-    registration = {
-        "name": config["name"],
-        "version": config["version"],
-        "callback_url": f'{config["callback_url"]}/hook',
-        "webhook_secret": config["callback_secret"],
-        "auth_header": config["callback_username"],
-        "auth_token": config["callback_password"],
-        # Registers for ALL events
-        "events": []
-    }
-    headers = {'Authorization': f'Bearer {config["cdr_token"]}'}
-    logging.info(
-        f"Registering with CDR: [{registration['name']} {registration['version']} {registration['callback_url']}]")
-    r = requests.post(f"{cdr_url}/user/me/register", json=registration, headers=headers)
-    logging.debug(r.text)
-    r.raise_for_status()
-    logging.info("Registered with CDR, response: %s", r.json()["id"])
-    return r.json()["id"]
+# def register_system(config):
+#     """
+#     Register our system to the CDR using the app_settings
+#     """
+#     registration = {
+#         "name": config["name"],
+#         "version": config["version"],
+#         "callback_url": f'{config["callback_url"]}/hook',
+#         "webhook_secret": config["callback_secret"],
+#         "auth_header": config["callback_username"],
+#         "auth_token": config["callback_password"],
+#         # Registers for ALL events
+#         "events": []
+#     }
+#     headers = {'Authorization': f'Bearer {config["cdr_token"]}'}
+#     logging.info(
+#         f"Registering with CDR: [{registration['name']} {registration['version']} {registration['callback_url']}]")
+#     r = requests.post(f"{cdr_url}/user/me/register", json=registration, headers=headers)
+#     logging.debug(r.text)
+#     r.raise_for_status()
+#     logging.info("Registered with CDR, response: %s", r.json()["id"])
+#     return r.json()["id"]
 
 
-def unregister_system(cdr_token, registration):
-    """
-    Unregister our system from the CDR
-    """
-    # unregister from the CDR
-    headers = {'Authorization': f"Bearer {cdr_token}"}
-    r = requests.delete(f"{cdr_url}/user/me/register/{registration}", headers=headers)
-    logging.info("Unregistered with CDR")
-    r.raise_for_status()
+# def unregister_system(cdr_token, registration):
+#     """
+#     Unregister our system from the CDR
+#     """
+#     # unregister from the CDR
+#     headers = {'Authorization': f"Bearer {cdr_token}"}
+#     r = requests.delete(f"{cdr_url}/user/me/register/{registration}", headers=headers)
+#     logging.info("Unregistered with CDR")
+#     r.raise_for_status()
 
-
+from cdrhook.connector import CdrConnector
 def create_app():
     """
     Create the Flask app, setting up the environment variables and
@@ -429,13 +506,13 @@ def create_app():
 
     # set up the config variables
     app = Flask(__name__)
-    config["name"] = os.getenv("SYSTEM_NAME")
-    config["version"] = os.getenv("SYSTEM_VERSION")
-    config["cdr_token"] = os.getenv("CDR_TOKEN")
-    config["callback_url"] = os.getenv("CALLBACK_URL")
-    config["callback_secret"] = os.getenv("CALLBACK_SECRET")
-    config["callback_username"] = os.getenv("CALLBACK_USERNAME")
-    config["callback_password"] = os.getenv("CALLBACK_PASSWORD")
+    # config["name"] = os.getenv("SYSTEM_NAME")
+    # config["version"] = os.getenv("SYSTEM_VERSION")
+    # config["cdr_token"] = os.getenv("CDR_TOKEN")
+    # config["callback_url"] = os.getenv("CALLBACK_URL")
+    # config["callback_secret"] = os.getenv("CALLBACK_SECRET")
+    # config["callback_username"] = os.getenv("CALLBACK_USERNAME")
+    # config["callback_password"] = os.getenv("CALLBACK_PASSWORD")
     config["rabbitmq_uri"] = os.getenv("RABBITMQ_URI")
     config["prefix"] = os.getenv("PREFIX")
     config["cdr_keep_event"] = strtobool(os.getenv("CDR_KEEP_EVENT", "no"))
@@ -445,8 +522,18 @@ def create_app():
         config["models"] = json.load(f)
 
     # register with the CDR
-    registration = register_system(config)
-    config["registration"] = registration
+    cdr_connector = CdrConnector(
+        system_name=os.getenv("SYSTEM_NAME"),
+        system_version=os.getenv("SYSTEM_VERSION"),
+        token=os.getenv("CDR_TOKEN"),
+        callback_url=os.getenv("CALLBACK_URL")+'/hook',
+        callback_secret=os.getenv("CALLBACK_SECRET"),
+        callback_username=os.getenv("CALLBACK_USERNAME"),
+        callback_password=os.getenv("CALLBACK_PASSWORD"),
+    )
+    cdr_connector.register()
+    # registration = register_system(config)
+    # config["registration"] = registration
 
     # register the hook
     path = urllib.parse.urlparse(config["callback_url"]).path
@@ -481,7 +568,8 @@ if __name__ == '__main__':
     # this does not work.
     def handle_sig(sig, frame):
         logging.warning(f"Got signal {sig}, now close worker...")
-        unregister_system(config['cdr_token'], config['registration'])
+        cdr_connector.unregister()
+        # unregister_system(config['cdr_token'], config['registration'])
         sys.exit(0)
 
     for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGQUIT, signal.SIGHUP):
