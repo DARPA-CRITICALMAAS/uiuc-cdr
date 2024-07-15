@@ -1,6 +1,15 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
+# # Returned by cog_download enpoint
+class CogDownloadSchema(BaseModel):
+    """
+    The response schema from the CDR cog download endpoint.
+    """
+    cog_url: str = Field(description="The URL to download the geotif of the requested cog")
+    ngmdb_prod: str = Field(description="???")
+    ngmdb_item: int = Field(description="???")
+
 # # Returned by cog_system_versions endpoint
 class SystemId(BaseModel):
     """
@@ -57,24 +66,3 @@ class CogMetadataSchema(BaseModel):
     georeferenced_count : int
     validated_count : int
 
-# Area extraction
-#     def pretty_str(self):
-#         """
-#         Return a pretty string representation of the area extraction.
-#         """
-#         outstr = "CogAreaExtractionsSchema(\n"
-#         outstr += f"\tarea_extraction_id: {self.area_extraction_id},\n"
-#         outstr += f"\tcog_id: {self.cog_id},\n"
-#         outstr += f"\treference_id: {self.reference_id},\n"
-#         outstr += f"\tpx_bbox: {self.px_bbox},\n"
-#         outstr += f"\tpx_geojson: {self.px_geojson},\n"
-#         outstr += f"\tsystem: {self.system},\n"
-#         outstr += f"\tsystem_version: {self.system_version},\n"
-#         outstr += f"\tmodel_id: {self.model_id},\n"
-#         outstr += f"\tvalidated: {self.validated},\n"
-#         outstr += f"\tconfidence: {self.confidence},\n"
-#         outstr += f"\tcategory: {self.category},\n"
-#         outstr += f"\ttext: {self.text},\n"
-#         outstr += f"\tprojected_feature: {self.projected_feature},\n"
-#         outstr += ")"
-#         return outstr

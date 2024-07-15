@@ -3,7 +3,7 @@ import requests
 from typing import List
 from pydantic import BaseModel
 from cdrhook.connector import CdrConnector
-from cdrhook.cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogMetadataSchema
+from cdrhook.cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogMetadataSchema, CogDownloadSchema
 from cdr_schemas.cdr_responses.area_extractions import AreaExtractionResponse
 from cdr_schemas.cdr_responses.legend_items import LegendItemResponse
 from cdr_schemas.map_results import MapResults
@@ -22,6 +22,16 @@ def validate_endpoint(response:dict, schema:BaseModel):
     return schema.model_validate(response)
 
 # region Cog Endpoints
+def retrieve_cog_download(connection:CdrConnector, cog_id:str) -> dict:
+    endpoint_url = f"{connection.cdr_url}/v1/maps/cog/{cog_id}"
+    return retrieve_endpoint(connection, endpoint_url)
+
+def validate_cog_download_response(response:dict) -> CogDownloadSchema:
+    """
+    Convert the response from the cdr into a CogDownloadSchema object, validating the data in the process.
+    """
+    return CogDownloadSchema.model_validate(response)
+
 def retrieve_cog_metadata(connection:CdrConnector, cog_id:str) -> dict:
     # Get cog info
     endpoint_url = f"{connection.cdr_url}/v1/maps/cog/meta/{cog_id}"

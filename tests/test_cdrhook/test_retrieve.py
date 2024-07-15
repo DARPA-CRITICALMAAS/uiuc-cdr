@@ -105,6 +105,18 @@ class TestRetrieveCog:
         assert response_data
         log.info("Test passed successfully")
 
+    def test_retrieve_cog_download(self):
+        log = init_test_log("TestRetrieveCog/test_retrieve_cog_download")
+        response_data = rt.retrieve_cog_download(self.con, self.cog_id)
+        # Save Response
+        json_path = "tests/logs/TestRetrieveCog/test_cog_download_response.json"
+        log.info(f"Saving result to {json_path}")
+        with open(json_path, "w") as fh:
+            fh.write(json.dumps(response_data))
+        # Check if response is not empty
+        assert response_data
+        log.info("Test passed successfully")
+
 class TestValidateCog:
     def test_validate_cog_system_versions_response(self):
         log = init_test_log("TestValidateCog/test_validate_cog_system_versions_response")
@@ -157,6 +169,17 @@ class TestValidateCog:
         # Validate data
         cog_results = rt.validate_cog_results_response(response_data)
         assert cog_results
+        log.info("Test passed successfully")
+
+    def test_validate_cog_download_response(self):
+        log = init_test_log("TestValidateCog/test_validate_cog_download_response")
+        # response_data = rt.retrieve_cog_download(self.con, self.cog_id)
+        with open("tests/data/sample_cog_download.json", "r") as fh:
+            response_data = json.load(fh)
+        # Validate data
+        cog_download = rt.validate_cog_download_response(response_data)
+        # log.info(f'Validated Data :\n{cog_download.pretty_str()}')
+        assert cog_download
         log.info("Test passed successfully")
 
 class TestRetrieveEvent:

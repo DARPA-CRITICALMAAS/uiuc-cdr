@@ -153,30 +153,43 @@ from cmaas_utils.types import CMAAS_Map
 from cdr_schemas.cdr_responses.area_extractions import AreaType
 def process_cog(cdr_connector, cog_id):
     """
-    Check to see if we have all the information for the cog. If we do then
-    write it to a temporary file and fire the download event.
+    Processing callback for cogs. Checks if there is enough information available
+    to process the cog with the requested models. If there is downloads the 
+    prereq data from the CDR, saves it to a temporary file and fires the download
+    event to rabbitmq.
     """
     valid_area_systems = ['uncharted']
     valid_legend_systems = ['polymer', 'uncharted']
 
     logging.info(f"{cog_id[0:8]} - Processing cog {cog_id}")
+    # Retrieve available system versions for this cog and check if there are any valid systems posted
+    sys_ver_response = retrieve.retrieve_cog_system_versions(cdr_connector, cog_id)
+    cog_system_versions = retrieve.validate_cog_system_versions_response(sys_ver_response)
+    valid_systems = False
+    for system in cog_system_versions.systems:
+        if system in valid_area_systems or system in valid_legend_systems:
+            valid_systems = True
+            break
+
+    if not valid_systems:
+        logging.error(f"{cog_id[0:8]} - No valid systems data found on CDR for cog")
+        # return
+    else:
+        logging.info(f"{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
+
     # Retrieve cdr data for this cog
     with ThreadPoolExecutor() as p:
-        sys_ver_future = p.submit(retrieve.retrieve_cog_system_versions, cdr_connector, cog_id)
         area_future = p.submit(retrieve.retrieve_cog_area_extraction, cdr_connector, cog_id)
         legend_future = p.submit(retrieve.retrieve_cog_legend_items, cdr_connector, cog_id)
         
-        sys_ver_response = sys_ver_future.result()
         area_response = area_future.result()
         legend_response = legend_future.result()
 
     # Validate responses to cdr_schema objects
-    cog_system_versions = retrieve.validate_cog_system_versions_response(sys_ver_response)
     cog_area_extraction = retrieve.validate_cog_area_extraction_response(area_response)
     cog_legend_items = retrieve.validate_cog_legend_items_response(legend_response)
 
     # Filter out systems that are not valid
-    logging.info(f"{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
     cog_area_extraction = [ae for ae in cog_area_extraction if ae.system in valid_area_systems]
     cog_legend_items = [li for li in cog_legend_items if li.system in valid_legend_systems]
 
@@ -208,20 +221,10 @@ def process_cog(cdr_connector, cog_id):
         logging.error(f"{cog_id[0:8]} - No polygon legend items found")
         valid_polygon_map_units = False
         # return
-
-    # Convert cdr obects to cmass objects for saving
-    layout = convert.convert_cdr_schema_area_extraction_to_layout(cog_area_extraction)
-    legend = convert.convert_cdr_schema_legend_items_to_cmass_legend(cog_legend_items)
-    map_data = CMAAS_Map(name=cog_id, cog_id=cog_id, layout=layout, legend=legend)
     
-    # write the cog_area to disk
-    # folder = os.path.join(cog_id[0:2], cog_id[2:4])
-    # filepart = os.path.join(folder, cog_id)
-    # filename = os.path.join("/data", f"{filepart}.cog_area.json")
-    filename = 'tests/logs/test_process_cog.json'
-    saveCMASSMap(filename, map_data)
-
+    firemodels = [ ] 
     for model, prereqs in config["models"].items():
+        goodmodel = True
         if "map_area" in prereqs and not valid_map_area:
             logging.debug("Skipping %s because of map_area", model)
             goodmodel = False
@@ -235,13 +238,31 @@ def process_cog(cdr_connector, cog_id):
             logging.debug("Skipping %s because of polygon_map_units", model)
             goodmodel = False
         logging.info(f"{cog_id[0:8]} - Firing download event for {model}")
+        if goodmodel:
+            firemodels.append(model)
 
-    if not goodmodel:
-        return
+    # if len(firemodels) == 0:
+        # return
+    
+    # Retrieve download link for the geotiff
+    cog_download_response = retrieve.retrieve_cog_download(cdr_connector, cog_id)
+    cog_download = retrieve.validate_cog_download_response(cog_download_response)
+
+    # Convert cdr obects to cmass objects for saving
+    layout = convert.convert_cdr_schema_area_extraction_to_layout(cog_area_extraction)
+    legend = convert.convert_cdr_schema_legend_items_to_cmass_legend(cog_legend_items)
+    map_data = CMAAS_Map(name=cog_id, cog_id=cog_id, layout=layout, legend=legend)
+
+    # write the cog_area to disk
+    folder = os.path.join(cog_id[0:2], cog_id[2:4])
+    filepart = os.path.join(folder, cog_id)
+    filename = os.path.join("/data", f"{filepart}.cog_area.json")
+    # filename = os.path.join("/data", f"{filepart}.map_data.json") # Change name to map_data.json
+    saveCMASSMap(filename, map_data)
 
     message = {
         "cog_id": cog_id,
-        "cog_url": cog_info["cog_url"],
+        "cog_url": cog_download.cog_url,
         "map_area": f'{config["callback_url"]}/download/{filepart}.cog_area.json',
         "models": firemodels
     }
