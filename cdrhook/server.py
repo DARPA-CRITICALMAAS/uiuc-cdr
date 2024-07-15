@@ -166,13 +166,13 @@ def process_cog(cdr_connector, cog_id):
     sys_ver_response = retrieve.retrieve_cog_system_versions(cdr_connector, cog_id)
     cog_system_versions = retrieve.validate_cog_system_versions_response(sys_ver_response)
     valid_systems = False
-    for system in cog_system_versions.systems:
-        if system in valid_area_systems or system in valid_legend_systems:
+    for system in cog_system_versions.system_versions:
+        if system.name in valid_area_systems or system.name in valid_legend_systems:
             valid_systems = True
             break
 
     if not valid_systems:
-        logging.error(f"{cog_id[0:8]} - No valid systems data found on CDR for cog")
+        logging.error(f"{cog_id[0:8]} - No valid system data found on CDR")
         # return
     else:
         logging.info(f"{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
@@ -241,8 +241,8 @@ def process_cog(cdr_connector, cog_id):
         if goodmodel:
             firemodels.append(model)
 
-    # if len(firemodels) == 0:
-        # return
+    if len(firemodels) == 0:
+        return
     
     # Retrieve download link for the geotiff
     cog_download_response = retrieve.retrieve_cog_download(cdr_connector, cog_id)
@@ -267,11 +267,7 @@ def process_cog(cdr_connector, cog_id):
         "models": firemodels
     }
     logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
-    #send_message(message, f'{config["prefix"]}download')
-
-    # os.makedirs(os.path.dirname(filename) , exist_ok=True)
-    # with open(filename, "w") as outputfile:
-    #     outputfile.write(map_data.model_dump_json())
+    # send_message(message, f'{config["prefix"]}download')
 
 
 def _process_cog(cog_id):
