@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Added 
+- Added connection and retrieve api for CDR interface
+- Added support for downloading legends from the CDR
+- Added unittests for cdrhook process_cog code
+- Added pytest github action
+- Added linting github action
+
+### Changed
+- Updated cdrhook server code
+- Updated message interface for download queue "map_area" -> "map_data"
+
+
 ## [0.7.3] - 2024-05-13
 
 ### Added
