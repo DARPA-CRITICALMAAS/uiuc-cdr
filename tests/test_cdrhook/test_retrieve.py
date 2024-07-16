@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 import cdrhook.retrieve as rt
 from cdrhook.connector import CdrConnector
+from cdrhook.cdr_endpoint_schemas import SystemId
 from tests.utilities import init_test_log
 
 class TestRetrieveCog:
@@ -51,14 +52,23 @@ class TestRetrieveCog:
         assert response_data
         log.info("Test passed successfully")
 
-    # def test_retrieve_cog_area_extraction_by_system_id(self):
-    #     log = init_test_log('TestRetrieveCog/test_retrieve_cog_area_extraction_by_system_id')
-    #     json_data = rt.retrieve_cog_area_extraction(self.con, self.cog_id, system_id=SystemId('polymer', '0.0.1'))
-    #     json_path = 'tests/logs/TestRetrieveCog/test_retrieve_cog_area_extraction_by_system_id.json'
-    #     log.info(f'Saving result to {json_path}')
-    #     with open(json_path, 'w') as fh:
-    #         fh.write(json.dumps(json_data))
-    #     log.info('Test passed successfully')
+    def test_retrieve_cog_area_extraction_by_system_id(self):
+        log = init_test_log('TestRetrieveCog/test_retrieve_cog_area_extraction_by_system_id')
+        cog_id = "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9"
+        test_system = SystemId(name='uncharted', version='0.0.4')
+        response_data = rt.retrieve_cog_area_extraction(self.con, cog_id, system_id=test_system)
+        cog_area_extraction = rt.validate_cog_area_extraction_response(response_data)
+        # Save Response 
+        json_path = 'tests/logs/TestRetrieveCog/test_retrieve_cog_area_extraction_by_system_id.json'
+        log.info(f'Saving result to {json_path}')
+        with open(json_path, 'w') as fh:
+            fh.write(json.dumps(response_data))
+        # Check only the requested system data is returned
+        assert len(cog_area_extraction) > 0
+        for area_system in cog_area_extraction:
+            assert area_system.system == test_system.name
+            assert area_system.system_version == test_system.version
+        log.info('Test passed successfully')
 
     def test_retrieve_cog_legend_items(self):
         log = init_test_log("TestRetrieveCog/test_retrieve_cog_legend_items")
@@ -72,14 +82,22 @@ class TestRetrieveCog:
         assert response_data
         log.info("Test passed successfully")
 
-    # def test_retrieve_cog_legend_items_by_system_id(self):
-    #     log = init_test_log('TestRetrieveCog/test_retrieve_cog_legend_items_by_system_id')
-    #     json_data = rt.retrieve_cog_legend_items(self.con, self.cog_id, system_id=SystemId('polymer', '0.0.1'))
-    #     json_path = 'tests/logs/TestRetrieveCog/test_cog_legend_items_by_system_id.json'
-    #     log.info(f'Saving result to {json_path}')
-    #     with open(json_path, 'w') as fh:
-    #         fh.write(json.dumps(json_data))
-    #     log.info('Test passed successfully')
+    def test_retrieve_cog_legend_items_by_system_id(self):
+        log = init_test_log('TestRetrieveCog/test_retrieve_cog_legend_items_by_system_id')
+        test_system = SystemId(name='polymer', version='0.0.1')
+        response_data = rt.retrieve_cog_legend_items(self.con, self.cog_id, system_id=test_system)
+        cog_legend_items = rt.validate_cog_legend_items_response(response_data)
+        # Save Response
+        json_path = 'tests/logs/TestRetrieveCog/test_cog_legend_items_by_system_id.json'
+        log.info(f'Saving result to {json_path}')
+        with open(json_path, 'w') as fh:
+            fh.write(json.dumps(response_data))
+        # Check only the requested system data is returned
+        assert len(cog_legend_items) > 0
+        for legend_system in cog_legend_items:
+            assert legend_system.system == test_system.name
+            assert legend_system.system_version == test_system.version
+        log.info('Test passed successfully')
 
     def test_retrieve_cog_metadata(self):
         log = init_test_log("TestRetrieveCog/test_retrieve_cog_metadata")

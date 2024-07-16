@@ -15,4 +15,14 @@ class MockConnector(CdrConnector):
 
 
 def get_mock_connector():
-    return MockConnector("mock_connector", "0.1", "mock_token")
+    con = MockConnector(
+        system_name="mock_connector",
+        system_version="0.1",
+        token="my_super_secret_mock_token_12345",
+        callback_url="https://mockurl.org/",
+        callback_secret="my_super_secret_mock_secret_54321",
+        callback_username="mock_username",
+        callback_password="password_99999",
+        registration="my_super_secret_mock_registration_67890"
+    )
+    return con
