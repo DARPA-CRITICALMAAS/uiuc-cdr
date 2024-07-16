@@ -1,4 +1,5 @@
 import os
+import json
 from dotenv import load_dotenv
 
 from cdrhook.server import process_cog
@@ -27,5 +28,11 @@ class TestCallbacks:
 
     def test_process_cog(self):
         log = init_test_log("TestCallbacks/test_process_cog")
-        process_cog(self.con, self.cog_id)
+        config = {}
+        config["mode"] = 'test'
+        config["prefix"] = os.getenv("PREFIX")
+        with open("cdrhook/models.json", "r") as f:
+            config["models"] = json.load(f)
+
+        process_cog(self.con, self.cog_id, config_parm=config)
         log.info("Test passed successfully")

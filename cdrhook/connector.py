@@ -65,6 +65,36 @@ class CdrConnector(BaseModel):
         r.raise_for_status()
         self.registration = None
 
+    def __str__(self) -> str:
+        repr = "CdrConnector("
+        repr += f"system_name='{self.system_name}', "
+        repr += f"system_version='{self.system_version}', "
+        repr += f"token='{self.token[:8]}...', "
+        repr += f"callback_url='{self.callback_url}', "
+        repr += f"callback_secret='{self.callback_secret[:8]}...', "
+        repr += f"callback_username='{self.callback_username}', "
+        repr += "callback_password='...', "
+        repr += f"events={self.events}, "
+        repr += f"cdr_url='{self.cdr_url}', "
+        repr += f"registration={self.registration[:8]}..."
+        repr += ")"
+        return repr
+
+    def __repr__(self) -> str:
+        repr = "CdrConnector("
+        repr += f"system_name='{self.system_name}', "
+        repr += f"system_version='{self.system_version}', "
+        repr += f"token='{self.token[:8]}...', "
+        repr += f"callback_url='{self.callback_url}', "
+        repr += f"callback_secret='{self.callback_secret[:8]}...', "
+        repr += f"callback_username='{self.callback_username}', "
+        repr += "callback_password='...', "
+        repr += f"events={self.events}, "
+        repr += f"cdr_url='{self.cdr_url}', "
+        repr += f"registration={self.registration[:8]}..."
+        repr += ")"
+        return repr
+
     def __del__(self):
         if self.registration is not None:
             self.unregister()

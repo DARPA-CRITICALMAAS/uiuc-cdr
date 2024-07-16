@@ -151,13 +151,22 @@ from cmaas_utils.io import saveCMASSMap
 from concurrent.futures import ThreadPoolExecutor
 from cmaas_utils.types import CMAAS_Map
 from cdr_schemas.cdr_responses.area_extractions import AreaType
-def process_cog(cdr_connector, cog_id):
+from cdrhook.connector import CdrConnector
+from typing import Optional
+def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optional[dict]=None):
     """
     Processing callback for cogs. Checks if there is enough information available
     to process the cog with the requested models. If there is downloads the 
     prereq data from the CDR, saves it to a temporary file and fires the download
     event to rabbitmq.
+
+    cdr_connector : CdrConnector, CDR Connection with a registered connection
+    cog_id : str, The cog_id to process
+    config_parm : dict, Optional field to overwrite the global config parameters, needed for unit testing
+
     """
+    if config_parm is None:
+        config_parm = config
     valid_area_systems = ['uncharted']
     valid_legend_systems = ['polymer', 'uncharted']
 
@@ -172,7 +181,8 @@ def process_cog(cdr_connector, cog_id):
             break
 
     if not valid_systems:
-        logging.error(f"{cog_id[0:8]} - No valid system data found on CDR")
+        # logging.error(f"{cog_id[0:8]} - No valid system data found on CDR")
+        raise ValueError(f"No valid system data found on CDR for {cog_id}")
         # return
     else:
         logging.info(f"{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
@@ -223,7 +233,7 @@ def process_cog(cdr_connector, cog_id):
         # return
     
     firemodels = [ ] 
-    for model, prereqs in config["models"].items():
+    for model, prereqs in config_parm["models"].items():
         goodmodel = True
         if "map_area" in prereqs and not valid_map_area:
             logging.debug("Skipping %s because of map_area", model)
@@ -242,8 +252,8 @@ def process_cog(cdr_connector, cog_id):
             firemodels.append(model)
 
     if len(firemodels) == 0:
-        return
-    
+        raise ValueError(f"No valid models found for {cog_id}")
+        
     # Retrieve download link for the geotiff
     cog_download_response = retrieve.retrieve_cog_download(cdr_connector, cog_id)
     cog_download = retrieve.validate_cog_download_response(cog_download_response)
@@ -256,18 +266,24 @@ def process_cog(cdr_connector, cog_id):
     # write the cog_area to disk
     folder = os.path.join(cog_id[0:2], cog_id[2:4])
     filepart = os.path.join(folder, cog_id)
-    filename = os.path.join("/data", f"{filepart}.cog_area.json")
-    # filename = os.path.join("/data", f"{filepart}.map_data.json") # Change name to map_data.json
-    saveCMASSMap(filename, map_data)
+    filename = os.path.join("/data", f"{filepart}.map_data.json")
+    if 'mode' in config_parm and config_parm['mode'] == 'test': # Can't write to /data in tests
+        filename = os.path.join('tests', 'data', f'{filepart}.map_data.json')
+    os.makedirs(os.path.dirname(filename) , exist_ok=True)
+
+    with open(filename, "w") as fh:
+        fh.write(map_data.model_dump_json())
+    # saveCMASSMap(filename, map_data)
 
     message = {
         "cog_id": cog_id,
         "cog_url": cog_download.cog_url,
-        "map_area": f'{config["callback_url"]}/download/{filepart}.cog_area.json',
+        "map_data": f'{cdr_connector.callback_url}/download/{filepart}.map_data.json',
         "models": firemodels
     }
     logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
-    # send_message(message, f'{config["prefix"]}download')
+    if 'mode' in config_parm and config_parm['mode'] != 'test': # Can't send rabbitmq in tests
+        send_message(message, f'{config_parm["prefix"]}download')
 
 
 def _process_cog(cog_id):
@@ -544,7 +560,7 @@ def cdrhook_listener(config):
 #     logging.info("Unregistered with CDR")
 #     r.raise_for_status()
 
-from cdrhook.connector import CdrConnector
+
 def create_app():
     """
     Create the Flask app, setting up the environment variables and
@@ -580,6 +596,7 @@ def create_app():
         callback_password=os.getenv("CALLBACK_PASSWORD"),
     )
     cdr_connector.register()
+    config["cdr_connector"] = cdr_connector
     # registration = register_system(config)
     # config["registration"] = registration
 
@@ -617,7 +634,6 @@ if __name__ == '__main__':
     def handle_sig(sig, frame):
         logging.warning(f"Got signal {sig}, now close worker...")
         cdr_connector.unregister()
-        # unregister_system(config['cdr_token'], config['registration'])
         sys.exit(0)
 
     for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGQUIT, signal.SIGHUP):

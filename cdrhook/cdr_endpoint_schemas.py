@@ -7,8 +7,8 @@ class CogDownloadSchema(BaseModel):
     The response schema from the CDR cog download endpoint.
     """
     cog_url: str = Field(description="The URL to download the geotif of the requested cog")
-    ngmdb_prod: str = Field(description="???")
-    ngmdb_item: int = Field(description="???")
+    ngmdb_prod: Optional[str] = Field(description="???")
+    ngmdb_item: Optional[int] = Field(description="???")
 
 # # Returned by cog_system_versions endpoint
 class SystemId(BaseModel):
