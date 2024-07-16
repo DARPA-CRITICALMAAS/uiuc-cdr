@@ -13,6 +13,16 @@ import sys
 from waitress.server import create_server
 import threading
 import time
+from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
+
+import cdrhook.retrieve as retrieve
+import cdrhook.convert as convert
+from cdrhook.connector import CdrConnector
+# from cmaas_utils.io import saveCMASSMap
+from cmaas_utils.types import CMAAS_Map
+from cdr_schemas.cdr_responses.area_extractions import AreaType
+
 
 auth = HTTPBasicAuth()
 cdr_url = "https://api.cdr.land"
@@ -21,7 +31,7 @@ config = { }
 cdr_connector = None
 
 # ----------------------------------------------------------------------
-# HELPER
+# region HELPER
 # ----------------------------------------------------------------------
 def strtobool (val):
     """Convert a string representation of truth to true (1) or false (0).
@@ -39,7 +49,7 @@ def strtobool (val):
 
 
 # ----------------------------------------------------------------------
-# Authentication/Verification
+# region Authentication/Verification
 # ----------------------------------------------------------------------
 @auth.verify_password
 def verify_password(username, password):
@@ -57,7 +67,7 @@ def verify_password(username, password):
 
 
 # ----------------------------------------------------------------------
-# Connection with RabbitMQ
+# region Connection with RabbitMQ
 # ----------------------------------------------------------------------
 def send_message(message, queue):
     """
@@ -73,7 +83,7 @@ def send_message(message, queue):
     connection.close()
 
 # ----------------------------------------------------------------------
-# Process maps
+# region Process maps
 # ----------------------------------------------------------------------
 def check_uncharted_event(event_id):
     """
@@ -145,14 +155,6 @@ def check_uncharted_event(event_id):
     logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
     send_message(message, f'{config["prefix"]}download')
 
-import cdrhook.retrieve as retrieve
-import cdrhook.convert as convert
-from cmaas_utils.io import saveCMASSMap
-from concurrent.futures import ThreadPoolExecutor
-from cmaas_utils.types import CMAAS_Map
-from cdr_schemas.cdr_responses.area_extractions import AreaType
-from cdrhook.connector import CdrConnector
-from typing import Optional
 def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optional[dict]=None):
     """
     Processing callback for cogs. Checks if there is enough information available
@@ -285,132 +287,8 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     if 'mode' in config_parm and config_parm['mode'] != 'test': # Can't send rabbitmq in tests
         send_message(message, f'{config_parm["prefix"]}download')
 
-
-def _process_cog(cog_id):
-    """
-    Check to see if we have all the information for the cog. If we do then
-    write it to a temporary file and fire the download event.
-    """
-    headers = {'Authorization': f'Bearer {config["cdr_token"]}'}
-
-    # create the result
-    result = {
-        "system": "ncsa",
-        "system_version": "0.0.0",
-        "cog_id": cog_id,
-        "line_feature_results": [ ],
-        "point_feature_results": [ ],
-        "polygon_feature_results": [ ],
-        "cog_area_extractions": [ ],
-        "cog_legend_items": [ ],
-        "cog_metadata_extractions": [ ]
-    }
-
-    # get the system information for map area (area_extraction)
-    r = requests.get(f"{cdr_url}/v1/features/{cog_id}/system_versions?type=area_extraction", headers=headers)
-    r.raise_for_status()
-    data = r.json()
-    logging.debug("Got system versions for area_extraction : %s", data)
-
-    # check if there is a map area
-    system = None
-    for version in data:
-        if version[0] == "uncharted":
-            system = version
-    if system:
-        logging.debug(f"MapArea found from {system[0]} version {system[1]}")
-    else:
-        logging.debug("No map area found")
-
-    # download map area
-    map_area = [ ]
-    if system:
-        r = requests.get(f"{cdr_url}/v1/features/{cog_id}/area_extractions?system_version={system[0]}__{system[1]}", headers=headers)
-        r.raise_for_status()
-        for item in r.json():
-            if item["system"] != system[0] or item["system_version"] != system[1]:
-                continue
-            if item["category"] == "map_area":
-                map_area.append(item)
-        result["cog_area_extractions"].extend(map_area)
-
-    # get the system information for legends
-    r = requests.get(f"{cdr_url}/v1/features/{cog_id}/system_versions?type=legend_item", headers=headers)
-    r.raise_for_status()
-    data = r.json()
-    logging.debug("Got system versions legend_item : %s", data)
-
-    # check if there is a legend
-    system = None
-    for version in data:
-        if version[0] == "polymer":
-            system = version
-    if not system:
-        for version in data:
-            if version[0] == "uncharted":
-                system = version
-    if system:
-        logging.debug(f"Legend found from {system[0]} version {system[1]}")
-    else:
-        logging.debug("No legend found")
-
-    # download legend
-    polygon_legend_area = [ ]
-    line_point_legend_area = [ ]
-    if system:
-        r = requests.get(f"{cdr_url}/v1/features/{cog_id}/legend_items?system_version={system[0]}__{system[1]}", headers=headers)
-        r.raise_for_status()
-        # legend does not have any filtering, so we do it locally as well as extract the polygons/point_line
-        for item in r.json():
-            if item["system"] != system[0] or item["system_version"] != system[1]:
-                continue
-            if item["category"] == "line_point_legend_area":
-                line_point_legend_area.append(item)
-            elif item["category"] == "polygon":
-                polygon_legend_area.append(item)
-        result["cog_legend_items"].extend(polygon_legend_area)
-        result["cog_legend_items"].extend(line_point_legend_area)
-
-    # write the cog_area to disk
-    folder = os.path.join(cog_id[0:2], cog_id[2:4])
-    filepart = os.path.join(folder, cog_id)
-    filename = os.path.join("/data", f"{filepart}.cog_area.json")
-    os.makedirs(os.path.dirname(filename) , exist_ok=True)
-    with open(filename, "w") as outputfile:
-        json.dump(result, outputfile)
-
-    # get the basic information
-    r = requests.get(f"{cdr_url}/v1/maps/cog/{cog_id}", headers=headers)
-    r.raise_for_status()
-    cog_info = r.json()
-
-    # send the download event
-    firemodels = [ ] 
-    for k, v in config["models"].items():
-        goodmodel = True
-        if "map_area" in v and not map_area:
-            logging.debug("Skipping %s because of map_area", k)
-            goodmodel = False
-        if "polygon_legend_area" in v and not polygon_legend_area:
-            logging.debug("Skipping %s because of polygon_legend_area", k)
-            goodmodel = False
-        if "line_point_legend_area" in v and not line_point_legend_area:
-            logging.debug("Skipping %s because of line_point_legend_area", k)
-            goodmodel = False
-        if goodmodel:
-            firemodels.append(k)
-
-    message = {
-        "cog_id": cog_id,
-        "cog_url": cog_info["cog_url"],
-        "map_area": f'{config["callback_url"]}/download/{filepart}.cog_area.json',
-        "models": firemodels
-    }
-    logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
-    send_message(message, f'{config["prefix"]}download')
-
 # ----------------------------------------------------------------------
-# Process incoming requests
+# region Process incoming requests
 # ----------------------------------------------------------------------
 def validate_request(data, signature_header, secret):
     """
@@ -459,7 +337,7 @@ def download(filename):
     return send_from_directory("/data", filename)
 
 # ----------------------------------------------------------------------
-# Start the server and register with the CDR
+# region Start the server and register with the CDR
 # ----------------------------------------------------------------------
 def cdrhook_callback(channel, method, properties, body):
     """
@@ -523,44 +401,6 @@ def cdrhook_listener(config):
             logging.exception("Error running cdrhook.")
         time.sleep(5)
 
-# ----------------------------------------------------------------------
-# Start the server and register with the CDR
-# ----------------------------------------------------------------------
-# def register_system(config):
-#     """
-#     Register our system to the CDR using the app_settings
-#     """
-#     registration = {
-#         "name": config["name"],
-#         "version": config["version"],
-#         "callback_url": f'{config["callback_url"]}/hook',
-#         "webhook_secret": config["callback_secret"],
-#         "auth_header": config["callback_username"],
-#         "auth_token": config["callback_password"],
-#         # Registers for ALL events
-#         "events": []
-#     }
-#     headers = {'Authorization': f'Bearer {config["cdr_token"]}'}
-#     logging.info(
-#         f"Registering with CDR: [{registration['name']} {registration['version']} {registration['callback_url']}]")
-#     r = requests.post(f"{cdr_url}/user/me/register", json=registration, headers=headers)
-#     logging.debug(r.text)
-#     r.raise_for_status()
-#     logging.info("Registered with CDR, response: %s", r.json()["id"])
-#     return r.json()["id"]
-
-
-# def unregister_system(cdr_token, registration):
-#     """
-#     Unregister our system from the CDR
-#     """
-#     # unregister from the CDR
-#     headers = {'Authorization': f"Bearer {cdr_token}"}
-#     r = requests.delete(f"{cdr_url}/user/me/register/{registration}", headers=headers)
-#     logging.info("Unregistered with CDR")
-#     r.raise_for_status()
-
-
 def create_app():
     """
     Create the Flask app, setting up the environment variables and
@@ -597,8 +437,6 @@ def create_app():
     )
     cdr_connector.register()
     config["cdr_connector"] = cdr_connector
-    # registration = register_system(config)
-    # config["registration"] = registration
 
     # register the hook
     path = urllib.parse.urlparse(config["callback_url"]).path
@@ -616,7 +454,7 @@ def create_app():
 
 
 # ----------------------------------------------------------------------
-# main
+# region main
 # ----------------------------------------------------------------------
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
