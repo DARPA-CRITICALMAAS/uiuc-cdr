@@ -31,6 +31,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         if [ -f cdrhook/requirements.txt ]; then pip install -r cdrhook/requirements.txt; fi
+    - name: Setup Env
+      run: |
+        echo "CDR_TOKEN=${{ secrets.CDR_TOKEN }}" >> $GITHUB_ENV
     - name: Test with pytest
       run: |
         pytest tests
