@@ -172,7 +172,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     valid_area_systems = ['uncharted']
     valid_legend_systems = ['polymer', 'uncharted']
 
-    logging.info(f"{cog_id[0:8]} - Processing cog {cog_id}")
+    logging.info(f"Cog:{cog_id[0:8]} - Processing cog {cog_id}")
     # Retrieve available system versions for this cog and check if there are any valid systems posted
     sys_ver_response = retrieve.retrieve_cog_system_versions(cdr_connector, cog_id)
     cog_system_versions = retrieve.validate_cog_system_versions_response(sys_ver_response)
@@ -187,7 +187,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
         raise ValueError(f"No valid system data found on CDR for {cog_id}")
         # return
     else:
-        logging.info(f"{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
+        logging.debug(f"Cog-{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
 
     # Retrieve cdr data for this cog
     with ThreadPoolExecutor() as p:
@@ -212,27 +212,23 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             ae_categories[ae.category] = 1
         else:
             ae_categories[ae.category] += 1
-    logging.info(f"{cog_id[0:8]} - Found {ae_categories}")
+    logging.debug(f"Cog-{cog_id[0:8]} - Found {ae_categories}")
     poly_map_units = [mu for mu in cog_legend_items if mu.category == 'polygon']
-    logging.info(f"{cog_id[0:8]} - Found {len(poly_map_units)} polygon map units")
+    logging.debug(f"Cog-{cog_id[0:8]} - Found {len(poly_map_units)} polygon map units")
     
     valid_map_area, valid_polygon_legend_area, valid_polygon_map_units = True, True, True
     if ae_categories[AreaType.Map_Area] < 1:
-        logging.error(f"{cog_id[0:8]} - No map area found")
+        logging.debug(f"Cog-{cog_id[0:8]} - No map area found")
         valid_map_area = False
-        # return
     if ae_categories[AreaType.Line_Point_Legend_Area] < 1:
-        logging.error(f"{cog_id[0:8]} - No line point legend area found")
+        logging.debug(f"Cog-{cog_id[0:8]} - No line point legend area found")
         valid_line_point_legend_area = False
-        # return
     if ae_categories[AreaType.Polygon_Legend_Area] < 1:
-        logging.error(f"{cog_id[0:8]} - No polygon legend area found")
+        logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend area found")
         valid_polygon_legend_area = False
-        # return
     if len(poly_map_units) < 1:
-        logging.error(f"{cog_id[0:8]} - No polygon legend items found")
+        logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend items found")
         valid_polygon_map_units = False
-        # return
     
     firemodels = [ ] 
     for model, prereqs in config_parm["models"].items():
@@ -254,7 +250,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             firemodels.append(model)
 
     if len(firemodels) == 0:
-        raise ValueError(f"No valid models found for {cog_id}")
+        raise ValueError(f"Cannot process {cog_id}, no models were able to be started")
         
     # Retrieve download link for the geotiff
     cog_download_response = retrieve.retrieve_cog_download(cdr_connector, cog_id)
