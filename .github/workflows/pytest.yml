@@ -34,7 +34,7 @@ jobs:
         if [ -f cdrhook/requirements.txt ]; then pip install -r cdrhook/requirements.txt; fi
     - name: Setup Env
       run: |
-        export CDR_TOKEN=${{ secrets.CDR_TOKEN }}
+        echo "CDR_TOKEN=${{ secrets.CDR_TOKEN }}" >> $GITHUB_ENV
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
