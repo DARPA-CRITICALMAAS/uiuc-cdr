@@ -38,9 +38,9 @@ class Worker(threading.Thread):
             counter = 0
             while not os.path.exists(file):
                 counter = counter + 1
-                if counter > file_check_max_checks: 
+                if counter > self.file_check_max_checks: 
                     raise ValueError(f"File {file} does not exist for uploader!!!")  
-                time.sleep(file_check_time_interval)
+                time.sleep(self.file_check_time_interval)
             # only upload if less than certain size
             if os.path.getsize(file) > max_size * 1024 * 1024:  # size in bytes
                 raise ValueError(f"File {file} is larger than {max_size}MB, skipping upload.")
