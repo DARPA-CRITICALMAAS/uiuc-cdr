@@ -6,7 +6,9 @@ import time
 # configuration options; should come from environment variables or something
 # this is the base of the working directory in the main (non-image) parallel
 # file system
-my_data_dir="/projects/bbym/shared/CDR_processing/pipeline_processing_003"
+
+#my_data_dir="/projects/bbym/shared/CDR_processing/pipeline_processing_003"
+my_data_dir="/data"
 
 print("")
 print("CriticaMAAS B-stage downloader")
@@ -79,7 +81,7 @@ def CDR_download_callback(ch, method, properties, body):
     # download the file first
     # (perhaps to be replaced by more python-y alternative from Rob)
     tif_file_URL=CDR_catalog['cog_url']
-    maparea_file_URL=CDR_catalog['map_area']
+    maparea_file_URL=CDR_catalog['map_data']
     CDR_model_list=CDR_catalog['models']
     my_cog_id=CDR_catalog['cog_id']
 
