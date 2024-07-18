@@ -7,6 +7,7 @@ ENV RABBITMQ_URI="amqp://guest:guest@localhost:5672/%2F" \
     MAX_SIZE=300
 
 WORKDIR /src
+VOLUME /data
 
 COPY requirements.txt /src/
 RUN pip install -r /src/requirements.txt
