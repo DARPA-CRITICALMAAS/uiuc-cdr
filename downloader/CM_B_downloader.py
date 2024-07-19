@@ -8,7 +8,21 @@ import time
 # file system
 
 #my_data_dir="/projects/bbym/shared/CDR_processing/pipeline_processing_003"
-my_data_dir="/data"
+try:
+    my_local_dir=os.environ['CMAAS_LOCAL_DATA_DIR']
+    my_data_dir=my_local_dir    
+except KeyError:
+    my_data_dir="/data"
+
+print(f'Data dir is {my_data_dir}')
+
+try:
+    test_file_filename=os.environ['CMAAS_LOCAL_DIR_TEST_FILE']
+    dir_test_file=os.path.join(my_data_dir,test_file_filename)
+    open(dir_test_file,'a')
+except KeyError:
+    a='2'
+    
 
 print("")
 print("CriticaMAAS B-stage downloader")

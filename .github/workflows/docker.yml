@@ -21,7 +21,8 @@ jobs:
           - cdrhook
           - uploader
           - monitor
-        include:
+	  - downloader
+	include:
           - name: cdrhook
             FOLDER: cdrhook
             #PLATFORM: "linux/amd64,linux/arm64"
@@ -35,6 +36,10 @@ jobs:
             FOLDER: monitor
             PLATFORM: "linux/amd64,linux/arm64"
             IMAGE: criticalmaas-monitor
+	  - name: downloader
+	    FOLDER: downloader
+	    PLATFORM: "linux/amd64,linux/arm64"
+	    IMAGE: criticalmaas-downloader
 
     steps:
       - uses: actions/checkout@v4
