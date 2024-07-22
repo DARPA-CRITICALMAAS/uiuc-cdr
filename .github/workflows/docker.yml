@@ -22,7 +22,7 @@ jobs:
           - uploader
           - monitor
           - downloader
-	include:
+        include:
           - name: cdrhook
             FOLDER: cdrhook
             #PLATFORM: "linux/amd64,linux/arm64"
