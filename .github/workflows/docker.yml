@@ -37,9 +37,9 @@ jobs:
             PLATFORM: "linux/amd64,linux/arm64"
             IMAGE: criticalmaas-monitor
           - name: downloader
-	    FOLDER: downloader
-	    PLATFORM: "linux/amd64,linux/arm64"
-	    IMAGE: criticalmaas-downloader
+            FOLDER: downloader
+            PLATFORM: "linux/amd64,linux/arm64"
+            IMAGE: criticalmaas-downloader
 
     steps:
       - uses: actions/checkout@v4
