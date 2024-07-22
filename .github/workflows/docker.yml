@@ -21,7 +21,7 @@ jobs:
           - cdrhook
           - uploader
           - monitor
-	  - downloader
+          - downloader
 	include:
           - name: cdrhook
             FOLDER: cdrhook
