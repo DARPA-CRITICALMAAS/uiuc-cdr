@@ -203,7 +203,7 @@ def cdrhook_callback(channel, method, properties, body):
             logging.debug("ignoring map.process")
         elif data.get("event") == "feature.process":
             event_id = data.get("payload", {}).get("id", "").strip()
-            if event_id.startswith("uncharted_0."):
+            if event_id.startswith("uncharted-area_0."):
                 check_uncharted_event(event_id)
             else:
                 logging.debug(f"Ignoring feature.process with id {event_id}")
