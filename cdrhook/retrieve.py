@@ -2,8 +2,8 @@ import logging
 import requests
 from typing import List
 from pydantic import BaseModel
-from .connector import CdrConnector
-from .cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogMetadataSchema, CogDownloadSchema
+from connector import CdrConnector
+from cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogMetadataSchema, CogDownloadSchema
 from cdr_schemas.cdr_responses.area_extractions import AreaExtractionResponse
 from cdr_schemas.cdr_responses.legend_items import LegendItemResponse
 from cdr_schemas.map_results import MapResults
