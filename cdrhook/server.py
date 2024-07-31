@@ -280,7 +280,9 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
         "models": firemodels
     }
     logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
-    if 'mode' in config_parm and config_parm['mode'] != 'test': # Can't send rabbitmq in tests
+    if 'mode' in config_parm and config_parm['mode'] == 'test': # Can't send rabbitmq in tests
+        pass
+    else:
         send_message(message, f'{config_parm["prefix"]}download')
 
 # ----------------------------------------------------------------------
