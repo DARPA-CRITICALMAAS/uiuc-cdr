@@ -1,5 +1,5 @@
 from typing import List
-from cdrhook.cdr_endpoint_schemas import CogMetadataSchema
+from cdr_endpoint_schemas import CogMetadataSchema
 from cdr_schemas.cdr_responses.legend_items import LegendItemResponse
 from cdr_schemas.cdr_responses.area_extractions import AreaExtractionResponse
 from cmaas_utils.types import Legend, MapUnit, MapUnitType, Layout, CMAAS_MapMetadata, Provenance
