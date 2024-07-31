@@ -169,8 +169,8 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     """
     if config_parm is None:
         config_parm = config
-    valid_area_systems = ['uncharted']
-    valid_legend_systems = ['polymer', 'uncharted']
+    valid_area_systems = ['uncharted-area']
+    valid_legend_systems = ['polymer', 'uncharted-area']
 
     logging.info(f"Cog:{cog_id[0:8]} - Processing cog {cog_id}")
     # Retrieve available system versions for this cog and check if there are any valid systems posted
