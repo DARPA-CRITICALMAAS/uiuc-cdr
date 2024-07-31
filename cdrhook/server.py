@@ -350,7 +350,7 @@ def cdrhook_callback(channel, method, properties, body):
             logging.debug("ping/pong")
         elif data.get("event") == "ncsacog":
             cog_id = data.get("cog_id", "").strip()
-            process_cog(cog_id)
+            process_cog(config["cdr_connector"], cog_id)
         elif data.get("event") == "map.process":
             logging.debug("ignoring map.process")
         elif data.get("event") == "feature.process":
