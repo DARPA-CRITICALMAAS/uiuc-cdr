@@ -276,7 +276,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     message = {
         "cog_id": cog_id,
         "cog_url": cog_download.cog_url,
-        "map_data": f'{cdr_connector.callback_url}/download/{filepart}.map_data.json',
+        "map_data": f'{config["callback_url"]}/download/{filepart}.map_data.json',
         "models": firemodels
     }
     logging.info("Firing download event for %s '%s'", cog_id, json.dumps(message))
