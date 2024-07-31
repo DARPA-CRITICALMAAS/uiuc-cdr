@@ -245,8 +245,8 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
         if "polygon_map_units" in prereqs and not valid_polygon_map_units:
             logging.debug("Skipping %s because of polygon_map_units", model)
             goodmodel = False
-        logging.info(f"{cog_id[0:8]} - Firing download event for {model}")
         if goodmodel:
+            logging.info(f"{cog_id[0:8]} - Firing download event for {model}")
             firemodels.append(model)
 
     if len(firemodels) == 0:
