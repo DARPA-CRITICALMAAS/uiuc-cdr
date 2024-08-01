@@ -7,8 +7,8 @@ from cdrhook.connector import CdrConnector
 from tests.utilities import init_test_log
 
 class TestCallbacks:
-    # cog_id = "78c274e9575d1ac948d55a55265546d711551cdd5cdd53592c9928d502d50700"
-    cog_id = "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9"
+    cog_id = "78c274e9575d1ac948d55a55265546d711551cdd5cdd53592c9928d502d50700"
+    #cog_id = "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9"
     def setup_class(self):
         load_dotenv()
         system_name = "ncsa_test"
@@ -31,6 +31,7 @@ class TestCallbacks:
         config = {}
         config["mode"] = 'test'
         config["prefix"] = os.getenv("PREFIX")
+        config["callback_url"] = 'http://fakeurl.com'
         with open("cdrhook/models.json", "r") as f:
             config["models"] = json.load(f)
 
