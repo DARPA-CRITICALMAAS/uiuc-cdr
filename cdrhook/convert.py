@@ -4,14 +4,6 @@ from cdr_schemas.cdr_responses.legend_items import LegendItemResponse
 from cdr_schemas.cdr_responses.area_extractions import AreaExtractionResponse
 from cmaas_utils.types import Legend, MapUnit, MapUnitType, Layout, CMAAS_MapMetadata, Provenance
 
-# This would require a lot of effort to convert and don't think it will be used. 
-# def convert_cdr_schema_map_to_cmass_map(cdr_map:MapResults) -> CMAAS_Map:
-#     map_data = CMAAS_Map(name="", cog_id=cdr_map.cog_id)
-#     map_data.metadata = 
-#     map_data.layout =
-#     map_data.legend = 
-#     return
-
 def convert_cdr_schema_metadata_to_cmass_map_metadata(cdr_metadata:CogMetadataSchema) -> CMAAS_MapMetadata:
     map_metadata = CMAAS_MapMetadata(provenance=Provenance(name='CDR', version='0.3.3'))
     map_metadata.title = cdr_metadata.cog_name
@@ -35,7 +27,7 @@ def convert_cdr_schema_legend_items_to_cmass_legend(cdr_legend:List[LegendItemRe
         map_unit.color = item.color
         map_unit.pattern = item.pattern
         #map_unit.overlay = 
-        map_unit.bounding_box = item.px_bbox
+        map_unit.bounding_box = [item.px_bbox[0:2],item.px_bbox[2:4]]
         legend.features.append(map_unit)
     return legend
 
