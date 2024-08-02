@@ -169,8 +169,8 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     """
     if config_parm is None:
         config_parm = config
-    valid_area_systems = ['uncharted-area']
-    valid_legend_systems = ['polymer', 'uncharted-area']
+    valid_area_systems = config_parm["systems"]["area"]
+    valid_legend_systems = config_parm["systems"]["legend"]
 
     logging.info(f"Cog:{cog_id[0:8]} - Processing cog {cog_id}")
     # Retrieve available system versions for this cog and check if there are any valid systems posted
@@ -184,7 +184,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
 
     if not valid_systems:
         # logging.error(f"{cog_id[0:8]} - No valid system data found on CDR")
-        raise ValueError(f"No valid system data found on CDR for {cog_id}")
+        raise ValueError(f"No valid system data found on CDR for {cog_id}, only saw {cog_system_versions.pretty_str()}")
         # return
     else:
         logging.debug(f"Cog-{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
@@ -422,6 +422,8 @@ def create_app():
     # load the models
     with open("models.json", "r") as f:
         config["models"] = json.load(f)
+    with open("systems.json", "r") as f:
+        config["systems"] = json.load(f)
 
     # register with the CDR
     cdr_connector = CdrConnector(
@@ -457,10 +459,11 @@ def create_app():
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
                                ' %(name)s - %(message)s',
-                        level=logging.DEBUG)
+                        level=logging.getLevelName(os.getenv("LOGLEVEL", "INFO").upper()))
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
     logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
     logging.getLogger('pika').setLevel(logging.WARN)
+    logging.info("Starting up with loglevel %s", os.getenv("LOGLEVEL", "INFO"))
 
     app = create_app()
     server = create_server(app, host="0.0.0.0", port=8080)
@@ -469,7 +472,7 @@ if __name__ == '__main__':
     # this does not work.
     def handle_sig(sig, frame):
         logging.warning(f"Got signal {sig}, now close worker...")
-        cdr_connector.unregister()
+        config["cdr_connector"].unregister()
         sys.exit(0)
 
     for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGQUIT, signal.SIGHUP):

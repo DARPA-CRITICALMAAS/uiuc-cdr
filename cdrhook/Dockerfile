@@ -14,6 +14,7 @@ ENV PYTHONUNBUFFERED=1 \
     CALLBACK_USERNAME="" \
     CALLBACK_PASSWORD="" \
     RABBITMQ_URI="amqp://guest:guest@localhost:5672/%2F" \
+    LOGLEVEL="INFO" \
     PREFIX=""
 
 VOLUME /data

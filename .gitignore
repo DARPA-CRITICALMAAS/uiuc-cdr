@@ -7,3 +7,4 @@ docker-compose.override.yml
 *.pyc
 *.DS_Store
 [Ll]ogs
+data
