@@ -1,4 +1,4 @@
 {
-    "area": ["uncharted"],
-    "legend": ["polymer", "uncharted-area"]
+    "area": ["uncharted-area"],
+    "legend": ["polymer"]
 }
