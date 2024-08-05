@@ -226,9 +226,9 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     if ae_categories[AreaType.Polygon_Legend_Area] < 1:
         logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend area found")
         valid_polygon_legend_area = False
-    if len(poly_map_units) < 1:
-        logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend items found")
-        valid_polygon_map_units = False
+    # if len(poly_map_units) < 1:
+    #     logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend items found")
+    #     valid_polygon_map_units = False
     
     firemodels = [ ] 
     for model, prereqs in config_parm["models"].items():
