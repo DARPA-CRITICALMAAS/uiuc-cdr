@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.0] - 2024-08-06
+
+### Added 
+- Added connection and retrieve api for CDR interface
+- Added support for downloading legends from the CDR
+- Added unittests for cdrhook process_cog code
+- Added pytest github action
+- Added linting github action
+- File `systems.json` controls order to check for map_area and polygon_legent
+
+### Changed
+- Updated cdrhook server code
+- Updated message interface for download queue "map_area" -> "map_data"
+- cdrhook has default log level of INFO (can be changed with LOGLEVEL environment variable)
+
+
 ## [0.7.3] - 2024-05-13
 
 ### Added

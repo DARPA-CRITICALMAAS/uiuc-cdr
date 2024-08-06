@@ -14,9 +14,17 @@ ENV PYTHONUNBUFFERED=1 \
     CALLBACK_USERNAME="" \
     CALLBACK_PASSWORD="" \
     RABBITMQ_URI="amqp://guest:guest@localhost:5672/%2F" \
+    LOGLEVEL="INFO" \
     PREFIX=""
 
 VOLUME /data
+
+# setup packages needed
+#    apt-get -y install python3-gdal libgdal-dev libgl1 && \
+RUN apt-get update && \
+    apt-get -y install python3-gdal libgdal-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
 RUN pip install -r ./requirements.txt

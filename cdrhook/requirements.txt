@@ -3,3 +3,11 @@ waitress
 flask_httpauth
 requests
 pika
+python-dotenv 
+pydantic
+geopandas
+rasterio
+git+https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git@v0.4.2
+
+--extra-index-url https://test.pypi.org/simple/
+cmaas_utils>=0.1.10

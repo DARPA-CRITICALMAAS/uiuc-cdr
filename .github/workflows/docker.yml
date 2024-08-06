@@ -24,7 +24,8 @@ jobs:
         include:
           - name: cdrhook
             FOLDER: cdrhook
-            PLATFORM: "linux/amd64,linux/arm64"
+            #PLATFORM: "linux/amd64,linux/arm64"
+            PLATFORM: "linux/amd64"
             IMAGE: criticalmaas-cdr
           - name: uploader
             FOLDER: uploader

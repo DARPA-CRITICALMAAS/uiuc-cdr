@@ -1,0 +1,382 @@
+[
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_4861c103ecd3b9fe7f6fba804aae137be40fd046fcc1f5e119d717504a68f6df",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            5889.0,
+            8215.0,
+            12003.0,
+            9082.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        11320.0,
+                        8215.0
+                    ],
+                    [
+                        11319.0,
+                        8216.0
+                    ],
+                    [
+                        9368.0,
+                        8216.0
+                    ],
+                    [
+                        9367.0,
+                        8217.0
+                    ],
+                    [
+                        9167.0,
+                        8217.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.9999693632125854,
+        "category": "cross_section",
+        "text": "",
+        "projected_feature": []
+    },
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_efb615e7458135f451be6d34715a9b45dceec638c1c1e0cb6c2a23c36cafcd4d",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            9670.0,
+            6829.0,
+            14951.0,
+            7799.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        14203.0,
+                        6829.0
+                    ],
+                    [
+                        14202.0,
+                        6830.0
+                    ],
+                    [
+                        14054.0,
+                        6830.0
+                    ],
+                    [
+                        14053.0,
+                        6831.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.999966025352478,
+        "category": "cross_section",
+        "text": "",
+        "projected_feature": []
+    },
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_d280230a1ca5a917c23624cdcc705b28eaaa85b3c58966f7257d102301a025e3",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            15223.0,
+            6725.0,
+            18460.0,
+            7849.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        18066.0,
+                        6725.0
+                    ],
+                    [
+                        18065.0,
+                        6726.0
+                    ],
+                    [
+                        18062.0,
+                        6726.0
+                    ],
+                    [
+                        18061.0,
+                        6727.0
+                    ],
+                    [
+                        18058.0,
+                        6727.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.9998865127563477,
+        "category": "cross_section",
+        "text": "",
+        "projected_feature": []
+    },
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_7c314529afbda4a914c334843da51d88b09be086885f4f3d9d3cfe06f298d02e",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            5676.0,
+            6873.0,
+            9578.0,
+            7750.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        8817.0,
+                        6873.0
+                    ],
+                    [
+                        8816.0,
+                        6874.0
+                    ],
+                    [
+                        8798.0,
+                        6874.0
+                    ],
+                    [
+                        8797.0,
+                        6875.0
+                    ],
+                    [
+                        8778.0,
+                        6875.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.9999841451644897,
+        "category": "cross_section",
+        "text": "",
+        "projected_feature": []
+    },
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_9975c9dbb4996c1eecde435f89b9a11b60b61681530786c9d5383f6dd432fedd",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            12761.0,
+            8120.0,
+            15543.0,
+            9130.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        15152.0,
+                        8120.0
+                    ],
+                    [
+                        15151.0,
+                        8121.0
+                    ],
+                    [
+                        15106.0,
+                        8121.0
+                    ],
+                    [
+                        15105.0,
+                        8122.0
+                    ],
+                    [
+                        14996.0,
+                        8122.0
+                    ],
+                    [
+                        14995.0,
+                        8123.0
+                    ],
+                    [
+                        14986.0,
+                        8123.0
+                    ],
+                    [
+                        14985.0,
+                        8124.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.9999713897705078,
+        "category": "cross_section",
+        "text": "",
+        "projected_feature": []
+    },
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_15c430217ee6419c08ce1dcb5f56b86c08b727e4555c5ad609758a81c05813b0",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            15944.0,
+            8210.0,
+            18238.0,
+            13588.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        16570.0,
+                        8211.0
+                    ],
+                    [
+                        16385.0,
+                        8211.0
+                    ],
+                    [
+                        16384.0,
+                        8212.0
+                    ],
+                    [
+                        16207.0,
+                        8212.0
+                    ],
+                    [
+                        16206.0,
+                        8213.0
+                    ],
+                    [
+                        16172.0,
+                        8213.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.9999890327453613,
+        "category": "line_point_legend_area",
+        "text": "",
+        "projected_feature": []
+    },
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_452588466a4e4450e9c4aaca2014c76f1c0f774b102e353f72653e55f51e78ed",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            581.0,
+            9399.0,
+            15692.0,
+            13322.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        6042.0,
+                        9399.0
+                    ],
+                    [
+                        6041.0,
+                        9400.0
+                    ],
+                    [
+                        5633.0,
+                        9400.0
+                    ],
+                    [
+                        5632.0,
+                        9401.0
+                    ],
+                    [
+                        5356.0,
+                        9401.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.9999577403068542,
+        "category": "polygon_legend_area",
+        "text": "",
+        "projected_feature": []
+    },
+    {
+        "area_extraction_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9_uncharted_0.0.4_d18f5b27b33775cfeedc7f7cfbcf1529054fe1586dad72f70a6cab329d100075",
+        "cog_id": "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9",
+        "reference_id": "",
+        "px_bbox": [
+            458.0,
+            651.0,
+            18427.0,
+            9052.0
+        ],
+        "px_geojson": {
+            "coordinates": [
+                [
+                    [
+                        12972.0,
+                        651.0
+                    ],
+                    [
+                        12971.0,
+                        652.0
+                    ],
+                    [
+                        12677.0,
+                        652.0
+                    ],
+                    [
+                        12676.0,
+                        653.0
+                    ],
+                    [
+                        12387.0,
+                        653.0
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "system": "uncharted",
+        "system_version": "0.0.4",
+        "model_id": "uncharted-lara_0.0.4",
+        "validated": false,
+        "confidence": 0.9999927878379822,
+        "category": "map_area",
+        "text": "",
+        "projected_feature": []
+    }
+]

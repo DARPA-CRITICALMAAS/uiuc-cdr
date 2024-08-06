@@ -1,0 +1,154 @@
+{
+    "cog_id": "78c274e9575d1ac948d55a55265546d711551cdd5cdd53592c9928d502d50700",
+    "georef_results": [
+        {
+            "cog_id": "78c274e9575d1ac948d55a55265546d711551cdd5cdd53592c9928d502d50700",
+            "georeference_results": [],
+            "gcps": [
+                {
+                    "gcp_id": "26938b0d-ba58-4711-b79c-a990d24bbea1",
+                    "map_geom": {
+                        "latitude": 48.875,
+                        "longitude": -96.5,
+                        "type": "Point"
+                    },
+                    "px_geom": {
+                        "rows_from_top": 307.0,
+                        "columns_from_left": 491.0,
+                        "type": "Point"
+                    },
+                    "confidence": null,
+                    "model": "umn",
+                    "model_version": "0.0.1",
+                    "crs": "EPSG:4326"
+                },
+                {
+                    "gcp_id": "39fba3a8-1514-4f38-8e9c-af634f6a365d",
+                    "map_geom": {
+                        "latitude": 48.875,
+                        "longitude": -96.375,
+                        "type": "Point"
+                    },
+                    "px_geom": {
+                        "rows_from_top": 7252.0,
+                        "columns_from_left": 491.0,
+                        "type": "Point"
+                    },
+                    "confidence": null,
+                    "model": "umn",
+                    "model_version": "0.0.1",
+                    "crs": "EPSG:4326"
+                },
+                {
+                    "gcp_id": "dba6212c-d751-4c55-9ae6-56b19199bd51",
+                    "map_geom": {
+                        "latitude": 48.75,
+                        "longitude": -96.375,
+                        "type": "Point"
+                    },
+                    "px_geom": {
+                        "rows_from_top": 7252.0,
+                        "columns_from_left": 5592.0,
+                        "type": "Point"
+                    },
+                    "confidence": null,
+                    "model": "umn",
+                    "model_version": "0.0.1",
+                    "crs": "EPSG:4326"
+                },
+                {
+                    "gcp_id": "9eaa35da-d8b1-4f44-9096-dca16af8d916",
+                    "map_geom": {
+                        "latitude": 48.75,
+                        "longitude": -96.5,
+                        "type": "Point"
+                    },
+                    "px_geom": {
+                        "rows_from_top": 307.0,
+                        "columns_from_left": 5592.0,
+                        "type": "Point"
+                    },
+                    "confidence": null,
+                    "model": "umn",
+                    "model_version": "0.0.1",
+                    "crs": "EPSG:4326"
+                }
+            ],
+            "system": "umn-usc-inferlink",
+            "system_version": "0.0.1"
+        }
+    ],
+    "extraction_results": [
+        {
+            "system": "umn-usc-inferlink",
+            "system_version": "0.0.1",
+            "cog_id": "78c274e9575d1ac948d55a55265546d711551cdd5cdd53592c9928d502d50700",
+            "line_feature_results": [
+                {
+                    "id": "0",
+                    "legend_provenance": null,
+                    "name": "",
+                    "abbreviation": "",
+                    "description": "Dashed where inferred. Arrows show relative horizontal movement; ball and bar on downthrown side",
+                    "legend_bbox": [],
+                    "legend_contour": [],
+                    "reference_id": "",
+                    "validated": false,
+                    "crs": "CRITICALMAAS:pixel",
+                    "cdr_projection_id": "",
+                    "line_features": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "id": "1",
+                                "geometry": {
+                                    "coordinates": [
+                                        [
+                                            2824.0,
+                                            3645.0
+                                        ],
+                                        [
+                                            2812.0,
+                                            3653.0
+                                        ],
+                                        [
+                                            2794.0,
+                                            3663.0
+                                        ],
+                                        [
+                                            2773.0,
+                                            3671.0
+                                        ],
+                                        [
+                                            2747.0,
+                                            3683.0
+                                        ],
+                                        [
+                                            2725.0,
+                                            3696.0
+                                        ]
+                                    ],
+                                    "type": "LineString"
+                                },
+                                "properties": {
+                                    "model": "umn-usc-inferlink",
+                                    "model_version": "0.0.1",
+                                    "confidence": 0.8,
+                                    "dash_pattern": "solid",
+                                    "symbol": "",
+                                    "reference_id": "",
+                                    "validated": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "point_feature_results": [],
+            "polygon_feature_results": [],
+            "cog_area_extractions": [],
+            "cog_metadata_extractions": []
+        }
+    ]
+}
