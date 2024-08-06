@@ -173,21 +173,25 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     valid_legend_systems = config_parm["systems"]["legend"]
 
     logging.info(f"Cog:{cog_id[0:8]} - Processing cog {cog_id}")
-    # Retrieve available system versions for this cog and check if there are any valid systems posted
-    sys_ver_response = retrieve.retrieve_cog_system_versions(cdr_connector, cog_id)
-    cog_system_versions = retrieve.validate_cog_system_versions_response(sys_ver_response)
-    valid_systems = False
-    for system in cog_system_versions.system_versions:
-        if system.name in valid_area_systems or system.name in valid_legend_systems:
-            valid_systems = True
-            break
 
-    if not valid_systems:
-        # logging.error(f"{cog_id[0:8]} - No valid system data found on CDR")
-        raise ValueError(f"No valid system data found on CDR for {cog_id}, only saw {cog_system_versions.pretty_str()}")
-        # return
-    else:
-        logging.debug(f"Cog-{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
+    # region 
+    ####### DISABLED TILL CDR IS FIXED #######
+    # Retrieve available system versions for this cog and check if there are any valid systems posted
+    # sys_ver_response = retrieve.retrieve_cog_system_versions(cdr_connector, cog_id)
+    # cog_system_versions = retrieve.validate_cog_system_versions_response(sys_ver_response)
+    # valid_systems = False
+    # for system in cog_system_versions.system_versions:
+    #     if system.name in valid_area_systems or system.name in valid_legend_systems:
+    #         valid_systems = True
+    #         break
+
+    # if not valid_systems:
+    #     # logging.error(f"{cog_id[0:8]} - No valid system data found on CDR")
+    #     raise ValueError(f"No valid system data found on CDR for {cog_id}, only saw {cog_system_versions.pretty_str()}")
+    #     # return
+    # else:
+    #     logging.debug(f"Cog-{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
+    ####### endregion #######
 
     # Retrieve cdr data for this cog
     with ThreadPoolExecutor() as p:
@@ -226,9 +230,9 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     if ae_categories[AreaType.Polygon_Legend_Area] < 1:
         logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend area found")
         valid_polygon_legend_area = False
-    if len(poly_map_units) < 1:
-        logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend items found")
-        valid_polygon_map_units = False
+    # if len(poly_map_units) < 1:
+    #     logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend items found")
+    #     valid_polygon_map_units = False
     
     firemodels = [ ] 
     for model, prereqs in config_parm["models"].items():
