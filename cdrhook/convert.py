@@ -18,6 +18,8 @@ def convert_cdr_schema_metadata_to_cmass_map_metadata(cdr_metadata:CogMetadataSc
     return map_metadata
 
 def convert_cdr_schema_legend_items_to_cmass_legend(cdr_legend:List[LegendItemResponse]) -> Legend:
+    if len(cdr_legend) == 0:
+        return None
     legend = Legend(provenance=Provenance(name=cdr_legend[0].system, version=cdr_legend[0].system_version))    
     for item in cdr_legend:
         map_unit = MapUnit(type=MapUnitType.from_str(item.category.lower()))
@@ -32,6 +34,8 @@ def convert_cdr_schema_legend_items_to_cmass_legend(cdr_legend:List[LegendItemRe
     return legend
 
 def convert_cdr_schema_area_extraction_to_layout(cdr_area_extraction:List[AreaExtractionResponse]) -> Layout:
+    if len(cdr_area_extraction) == 0:
+        return None
     layout = Layout(provenance=Provenance(name=cdr_area_extraction[0].system, version=cdr_area_extraction[0].system_version))
     for area in cdr_area_extraction:
         if area.category == 'map_area':
