@@ -112,7 +112,8 @@ def CDR_download_callback(ch, method, properties, body):
     #    image_data_path=os.path.join(image_data_base_dir_absolute,extended_split_path)
     external_data_path=os.path.join(external_data_base_dir_relative,extended_split_path)
     tif_data_file_name=my_cog_id+".cog.tif"
-    maparea_data_file_name=my_cog_id+".cog_area.json"
+#    maparea_data_file_name=my_cog_id+".cog_area.json"
+    maparea_data_file_name=my_cog_id+".map_data.json"
     
     # this is the location of the data file within the container, relative to its canonical folder (probably "/data")
     #    tif_filename_with_path=os.path.join(image_data_path,tif_data_file_name)
