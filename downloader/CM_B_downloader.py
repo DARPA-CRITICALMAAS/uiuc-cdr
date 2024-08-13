@@ -151,11 +151,11 @@ class DL_worker(threading.Thread):
             for model_to_process in CDR_model_list:
                 self.output_model_list.append(model_to_process)
             
-        except RequestException as e:
-            logging.exception(f"Request Error {response.text}.")
-            self.exception = e
+#        except RequestException as e:
+#            logging.exception(f"Request Error {response.text}.")
+#            self.exception = e
         except Exception as e:
-            logging.exception("Error processing pipeline request.")
+            logging.exception("Error processing download .")
             self.exception = e
 
 
@@ -346,8 +346,8 @@ def main(argv):
                 my_output_dictionary = worker.output_message_dictionary
 
                 if worker.exception:
-                    error_data['exception'] = repr(worker.exception)
-                    channel.basic_publish(exchange='', routing_key=download_error_queue, body=json.dumps(error_data), properties=worker.properties)
+                    my_output_dictionary['exception'] = repr(worker.exception)
+                    channel.basic_publish(exchange='', routing_key=download_error_queue, body=json.dumps(my_output_dictionary), properties=worker.properties)
                 else:
                     # send a process message for each model in the list
                     for model_to_process in my_model_list:
@@ -360,8 +360,8 @@ def main(argv):
                         channel.queue_declare(queue=my_process_queue, durable=True)
                         properties = pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent)
                         channel.basic_publish(exchange='', routing_key=my_process_queue, body=outgoing_message, properties=properties)
-                    channel.basic_ack(delivery_tag=worker.method.delivery_tag)
-                    worker = None
+                channel.basic_ack(delivery_tag=worker.method.delivery_tag)
+                worker = None
                 
             
     print ("should never get here!  Exiting!")
