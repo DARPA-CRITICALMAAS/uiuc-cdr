@@ -48,25 +48,6 @@ process_model_list = ["golden_muscat","flat_iceberg","drab_volcano"]
 # RABBITMQ_URI *must* be defined in the incoming environment otherwise all the rabbitmq features will not work.  
 rabbitmq_uri = os.getenv("RABBITMQ_URI", "amqp://guest:guest@localhost:5672/%2F")
 
-###############
-# this is only here because the include isn't working
-
-RMQ_username = "criticalmaas"
-RMQ_password = "keeNgoo1VahthuS4ii1r"
-
-#
-##############
-
-def set_up_RMQ(secrets_file):
-    global rabbitmq_uri
-    #    global RMQ_username
-#    global RMQ_password
-    
-#    if os.path.exists(secrets_file):
-#        execfile(filename)
-#    rabbitmq_uri = f"amqp://{RMQ_username}:{RMQ_password}@rabbitmq.criticalmaas.software-dev.ncsa.illinois.edu:5672/shepard"
-    return rabbitmq_uri
-
 # the downloader worker class
 class DL_worker(threading.Thread):
     output_model_list = []
@@ -287,6 +268,7 @@ def main(argv):
     my_output_dir=""
     my_model_name=""
 
+    global rabbitmq_uri
     global my_log_dir
     global my_pipeline_image
     global download_queue
@@ -299,9 +281,6 @@ def main(argv):
 
     print("input file:>"+my_input_file+"<")
     print("output directory:>"+my_output_dir+"<")
-
-    # set up consumer
-    rabbitmq_uri=set_up_RMQ("~/.criticalmaas/secrets")
 
     parameters = pika.URLParameters(rabbitmq_uri)
     print('About to open rabbitMQ connection')
