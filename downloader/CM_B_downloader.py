@@ -45,8 +45,8 @@ process_model_list = ["golden_muscat","flat_iceberg","drab_volcano"]
 # requests to as we receive requests from CDR
 #process_queue_list=[]
 
-#rabbitmq_uri = "amqp://criticalmaas:keeNgoo1VahthuS4ii1r@rabbitmq.criticalmaas.software-dev.ncsa.illinois.edu:5672/shepard"
-rabbitmq_uri = "amqp://ncsa:teef1Wor8iey9ohsheic@criticalmaas.ncsa.illinois.edu:5672/%2F"
+# RABBITMQ_URI *must* be defined in the incoming environment otherwise all the rabbitmq features will not work.  
+rabbitmq_uri = os.getenv("RABBITMQ_URI", "amqp://guest:guest@localhost:5672/%2F")
 
 ###############
 # this is only here because the include isn't working
