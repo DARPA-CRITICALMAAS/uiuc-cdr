@@ -367,55 +367,7 @@ def main(argv):
     print ("should never get here!  Exiting!")
     sys.exit(2)
                     
-    channel.queue_declare(queue=download_queue, durable=True)
 
-    channel.basic_consume(queue=download_queue, on_message_callback=CDR_download_callback, auto_ack=False)    
-    # presumably this funtion takes us into a wait-process loop forever
-    print('start consumer loop')
-    channel.start_consuming()
-
-    #    my_catalog=json.load(jfile)
-                                         
-
-    #    my_request_dictionary={'input': my_input , 'output': my_output}
-
-    #    my_message = json.dumps(my_request_dictionary)
-
-    #    print("extract from catalog: map_name="+my_catalog[0]["map_name"])
-
-    # shouldn't get here, but just in case
-    sys.exit(2)
-    
-    my_outgoing_message_dictionary={'map_name': my_catalog[catalog_line]['map_name'] , 'map_id': my_catalog[catalog_line]['map_id'], 'cog_url': my_catalog[catalog_line]['cog_url']}
-
-    
-    if len(my_input_file) > 0:
-        print("creating a single-file dictionary")
-        my_message_dictionary={'request_type': "input_file" , 'input_file': my_input_file , 'input_dir': my_input_dir, 'output_dir': my_output_dir, 'model': my_model_name, 'pipeline_image': my_pipeline_image, 'log_dir': my_log_dir}
-    else:
-        print("creating a directory (multi-file) dictionary")
-        my_message_dictionary={'request_type': "input_dir" , 'input_dir': my_input_dir , 'output_dir': my_output_dir, 'model': my_model_name, 'pipeline_image': my_pipeline_image, 'log_dir': my_log_dir}
-        
-    my_message = json.dumps(my_message_dictionary)
-    
-    parameters = pika.URLParameters(rabbitmq_uri)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
-    channel.queue_declare(queue=queue, durable=True)
-
-    properties = pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent)
-##    message = "hello world"
-    channel.basic_publish(exchange='', routing_key=queue, body=my_message, properties=properties)
-
-# here's the thing we're feeding (from 2024 April 10th):
-# apptainer run --nv -B ./logs:/logs  -B /projects/bbym/saxton/MockValData/:/data -B ./output:/output /projects/bbym/shared/continerExchange/criticalmaas-pipeline_latest.sif -v --log /logs/logs.latest --data /data/theFile.tif --legends /data/theFile.json
-# added: --model flat_iceberg    
-#
-# apptainer run --nv -B ./logs:/logs  -B /projects/bbym/saxton/MockValData/:/data -B ./output:/output /projects/bbym
-
-
-
-    print("finished producer main()")
 
 
 if __name__ == '__main__':
