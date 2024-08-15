@@ -60,6 +60,7 @@ class DL_worker(threading.Thread):
         self.exception = None
 
     def run(self):
+        self.output_model_list.clear()
         try:
             CDR_catalog = json.loads(self.body_in)
             print("about to print catalog")
@@ -333,12 +334,8 @@ def main(argv):
                         print(f"sending process request for model {model_to_process}")
                         my_process_queue = process_queue_base+model_to_process
                         outgoing_message=json.dumps(my_output_dictionary)
-                        parameters = pika.URLParameters(rabbitmq_uri)
-                        connection = pika.BlockingConnection(parameters)
-                        channel = connection.channel()
                         channel.queue_declare(queue=my_process_queue, durable=True)
-                        properties = pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent)
-                        channel.basic_publish(exchange='', routing_key=my_process_queue, body=outgoing_message, properties=properties)
+                        channel.basic_publish(exchange='', routing_key=my_process_queue, body=outgoing_message, properties=worker.properties)
                 channel.basic_ack(delivery_tag=worker.method.delivery_tag)
                 worker = None
                 
