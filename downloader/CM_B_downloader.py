@@ -63,9 +63,9 @@ class DL_worker(threading.Thread):
         self.output_model_list.clear()
         try:
             CDR_catalog = json.loads(self.body_in)
-            print("about to print catalog")
-            print(CDR_catalog)
-            print("finished catalog")
+            logging.debug("about to print catalog")
+            logging.debug(CDR_catalog)
+            logging.debug("finished catalog")
 
             # I don't think I need to, or even can, do this.  I don't think
             # I have the right kind of handle
