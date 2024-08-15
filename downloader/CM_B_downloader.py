@@ -17,7 +17,10 @@ try:
 except KeyError:
     my_data_dir="/data"
 
-print(f'Data dir is {my_data_dir}')
+#print(f'Data dir is {my_data_dir}')
+
+#logging.debug("Data dir is:")
+#logging.debug(my_data_dir)
 
 try:
     test_file_filename=os.environ['CMAAS_LOCAL_DIR_TEST_FILE']
@@ -27,8 +30,8 @@ except KeyError:
     a='2'
     
 
-print("")
-print("CriticaMAAS B-stage downloader")
+#print("")
+#print("CriticaMAAS B-stage downloader")
 
 download_main_queue="download"
 download_error_queue="download.error"
@@ -77,7 +80,8 @@ class DL_worker(threading.Thread):
             maparea_file_URL=CDR_catalog['map_data']
             CDR_model_list=CDR_catalog['models']
             my_cog_id=CDR_catalog['cog_id']
-
+            logging.info(f"Processing COG {my_cog_id}")
+            
             # figure out filenames and paths for everything
 
             # we split the target into intermediate directories to avoid pileup of tons
@@ -103,10 +107,10 @@ class DL_worker(threading.Thread):
             if maparea_file_URL:
                 # rm -f is because there's no clean way to tell wget to overwrite files; so this guarantees that the file is the newest downloaded one.  
                 DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; rm -f "+maparea_data_file_name+" ; wget "+maparea_file_URL
-                print("about to run maparea download command: "+DL_command)
+                logging.debug("about to run maparea download command: "+DL_command)
                 os.system(DL_command)
                 #time.sleep(2)
-                print("finished maparea download command")
+                logging.debug("finished maparea download command")
                 
             # if the incoming message specified an image file, get it
             if tif_file_URL:
@@ -116,12 +120,12 @@ class DL_worker(threading.Thread):
                 fetch_file_components=tif_file_URL.split("/")
                 fetch_file_total_path=os.path.join(fetch_file_path,fetch_file_components[-1])
                 if os.path.isfile(fetch_file_total_path):
-                    print(f"File >{fetch_file_total_path}< already exists!  Skipping download.")
+                    logging.debug(f"File >{fetch_file_total_path}< already exists!  Skipping download.")
                 else:
-                    print("about to run tif download command: "+DL_command)
+                    logging.debug("about to run tif download command: "+DL_command)
                     os.system(DL_command)
                     #time.sleep(5)
-                    print("finished tif download command")
+                    logging.debug("finished tif download command")
                     
             # construct and send processing orders based on the incoming message, and
             # what we downloaded.  For completeness, we also include the entire incoming
@@ -154,15 +158,15 @@ def CDR_download_callback(ch, method, properties, body):
 
     my_relative_filename=""
     
-    print("***Received:")
+    logging.debug("***Received:")
     # catalog from CDR
     CDR_catalog=json.loads(body)
-    print("got CDR catalog")
+    logging.debug("got CDR catalog")
     #    print("map name:>>"+my_catalog['map_name']+"<<")
 
-    print("about to print catalog")
-    print(CDR_catalog)
-    print("finished catalog")
+    logging.debug("about to print catalog")
+    logging.debug(CDR_catalog)
+    logging.debug("finished catalog")
 
     # ack here so the request gets removed from the stack before
     # downloading; downloading can be minutes
@@ -203,9 +207,9 @@ def CDR_download_callback(ch, method, properties, body):
     if maparea_file_URL:
         # rm -f is because there's no clean way to tell wget to overwrite files; so this guarantees that the file is the newest downloaded one.  
         DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; rm -f "+maparea_data_file_name+" ; wget "+maparea_file_URL
-        print("about to run maparea download command: "+DL_command)
+        logging.debug("about to run maparea download command: "+DL_command)
         os.system(DL_command)
-        print("finished maparea download command")
+        logging.debug("finished maparea download command")
 
     if tif_file_URL:
         DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; wget "+tif_file_URL
@@ -214,11 +218,11 @@ def CDR_download_callback(ch, method, properties, body):
         fetch_file_components=tif_file_URL.split("/")
         fetch_file_total_path=os.path.join(fetch_file_path,fetch_file_components[-1])
         if os.path.isfile(fetch_file_total_path):
-            print(f"File >{fetch_file_total_path}< already exists!  Skipping download.")
+            logging.debug(f"File >{fetch_file_total_path}< already exists!  Skipping download.")
         else:
-            print("about to run tif download command: "+DL_command)
+            logging.debug("about to run tif download command: "+DL_command)
             os.system(DL_command)
-            print("finished tif download command")
+            logging.debug("finished tif download command")
 
     # set up message; the message is only specific to the request file, not to
     # the model, so we can set up a message to be sent to all of the processing
@@ -239,9 +243,9 @@ def CDR_download_callback(ch, method, properties, body):
         my_process_queue = process_queue_base+model_to_process
 
         outgoing_message=json.dumps(outgoing_message_dictionary)
-        print("About to send process message:")
-        print(outgoing_message)
-        print("finished process message")
+        logging.debug("About to send process message:")
+        logging.debug(outgoing_message)
+        logging.debug("finished process message")
         parameters = pika.URLParameters(rabbitmq_uri)
         connection = pika.BlockingConnection(parameters)
         channel = connection.channel()
@@ -251,8 +255,8 @@ def CDR_download_callback(ch, method, properties, body):
 
     # exit after a single message processing for testing
 #    sys.exit(2)
-    print("pausing")
-    time.sleep(2)
+#    print("pausing")
+#    time.sleep(2)
 
         
         
@@ -278,15 +282,18 @@ def main(argv):
     global process_model_list
     global process_queue_base
     
-#    queue=queue_base+"_"+my_model_name
+    #    queue=queue_base+"_"+my_model_name
 
-    print("input file:>"+my_input_file+"<")
-    print("output directory:>"+my_output_dir+"<")
+    logging.debug(f'Data directory is {my_data_dir}')
+
+
+#    print("input file:>"+my_input_file+"<")
+#    print("output directory:>"+my_output_dir+"<")
 
     parameters = pika.URLParameters(rabbitmq_uri)
-    print('About to open rabbitMQ connection')
+    logging.debug('About to open rabbitMQ connection')
     connection = pika.BlockingConnection(parameters)
-    print('RabbitMQ connection succeeded!')
+    logging.info('RabbitMQ connection succeeded!')
     channel = connection.channel()
 
     # from this point, following the template from the uploader
