@@ -106,7 +106,7 @@ class DL_worker(threading.Thread):
             # if the incoming message specified a maparea file, get it
             if maparea_file_URL:
                 # rm -f is because there's no clean way to tell wget to overwrite files; so this guarantees that the file is the newest downloaded one.  
-                DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; rm -f "+maparea_data_file_name+" ; wget -q "+maparea_file_URL+" >& /tmp/trash.out"
+                DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; rm -f "+maparea_data_file_name+" ; wget -q "+maparea_file_URL
                 logging.debug("about to run maparea download command: "+DL_command)
                 os.system(DL_command)
                 #time.sleep(2)
@@ -114,7 +114,7 @@ class DL_worker(threading.Thread):
                 
             # if the incoming message specified an image file, get it
             if tif_file_URL:
-                DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; wget -q "+tif_file_URL+" >& /tmp/trash.out"
+                DL_command="cd "+my_data_dir+" ; mkdir -p "+external_data_path+" ; cd "+external_data_path+" ; wget -q "+tif_file_URL
                 # check for file before downloading
                 fetch_file_path=os.path.join(my_data_dir,external_data_path);
                 fetch_file_components=tif_file_URL.split("/")
