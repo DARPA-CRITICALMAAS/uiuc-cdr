@@ -310,6 +310,7 @@ def main(argv):
         # grab the next message from the download queue
         # We only get a real message when there is a message waiting and we've
         # closed out the last one
+        logging.debug("loop")
         method, properties, body = next(consumer)
         if method:
             # if there was a new message with real information in it,
@@ -327,11 +328,13 @@ def main(argv):
 
                 if worker.exception:
                     my_output_dictionary['exception'] = repr(worker.exception)
-                    channel.basic_publish(exchange='', routing_key=download_error_queue, body=json.dumps(my_output_dictionary), properties=worker.properties)
+                    channel.basic_publish(exchange='', routing_key=download_error_queue,
+                                          body=json.dumps(my_output_dictionary),
+                                          properties=worker.properties)
                 else:
                     # send a process message for each model in the list
                     for model_to_process in my_model_list:
-                        print(f"sending process request for model {model_to_process}")
+                        logging.debug(f"sending process request for model {model_to_process}")
                         my_process_queue = process_queue_base+model_to_process
                         outgoing_message=json.dumps(my_output_dictionary)
                         channel.queue_declare(queue=my_process_queue, durable=True)
@@ -347,5 +350,11 @@ def main(argv):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
+                        ' %(name)s - %(message)s',
+                        level=logging.getLevelName(os.getenv("LOGLEVEL", "INFO").upper()))
+    logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
+    logging.getLogger('urllib3.connectionpool').setLevel(logging.WARN)
+    logging.getLogger('pika').setLevel(logging.WARN)
     main(sys.argv[1:])
     
