@@ -96,8 +96,8 @@ class DL_worker(threading.Thread):
             maparea_data_file_name=my_cog_id+".map_data.json"
 
             # here we have the actual paths for the files we're going to (potentially) download
-            tif_filename_with_path=os.path.join(external_data_path,tif_data_file_name)
-            maparea_filename_with_path=os.path.join(external_data_path,maparea_data_file_name)
+            tif_filename_with_path=os.path.join(relative_file_location,tif_data_file_name)
+            maparea_filename_with_path=os.path.join(relative_file_location,maparea_data_file_name)
             
             # if the incoming message specified a maparea file, get it
             if maparea_file_URL:
