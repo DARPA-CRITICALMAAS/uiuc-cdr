@@ -90,7 +90,7 @@ class DL_worker(threading.Thread):
             split_path=os.path.join(my_cog_id[0:2],my_cog_id[2:4])
             relative_file_location=os.path.join(split_path,my_cog_id)
             # this is where the data directory is mounted inside the image
-            data_location_base="data"
+            data_location_base=""
 #            image_base_dir_absolute="/"+data_location_relative
             
             # the total path in the image where the data is reference from
