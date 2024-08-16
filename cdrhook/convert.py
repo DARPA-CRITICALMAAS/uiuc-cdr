@@ -29,7 +29,7 @@ def convert_cdr_schema_legend_items_to_cmass_legend(cdr_legend:List[LegendItemRe
         map_unit.color = item.color
         map_unit.pattern = item.pattern
         #map_unit.overlay = 
-        map_unit.bounding_box = [item.px_bbox[0:2],item.px_bbox[2:4]]
+        map_unit.label_bbox = [item.px_bbox[0:2],item.px_bbox[2:4]]
         legend.features.append(map_unit)
     return legend
 

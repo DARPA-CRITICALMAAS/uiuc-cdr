@@ -19,7 +19,6 @@ from concurrent.futures import ThreadPoolExecutor
 import retrieve
 import convert
 from connector import CdrConnector
-# from cmaas_utils.io import saveCMASSMap
 from cmaas_utils.types import CMAAS_Map
 from cdr_schemas.cdr_responses.area_extractions import AreaType
 
