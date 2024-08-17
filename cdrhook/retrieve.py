@@ -96,11 +96,11 @@ def validate_cog_area_extraction_response(response:List[dict]) -> List[AreaExtra
         area_extractions.append(AreaExtractionResponse.model_validate(item))
     return area_extractions
 
-def retrieve_cog_legend_items(connection:CdrConnector, cog_id:str, system_id:SystemId=None) -> List[dict]:
+def retrieve_cog_legend_items(connection:CdrConnector, cog_id:str, system_id:SystemId=None, validated:str="false") -> List[dict]:
     # Get all legend items for a cog
-    endpoint_url = f"{connection.cdr_url}/v1/features/{cog_id}/legend_items"
+    endpoint_url = f"{connection.cdr_url}/v1/features/{cog_id}/legend_items?validated={validated.lower()}"
     if system_id is not None:
-        endpoint_url += f"?system_version={system_id.name}__{system_id.version}"
+        endpoint_url += f"&system_version={system_id.name}__{system_id.version}"
     return retrieve_endpoint(connection, endpoint_url)
 
 def validate_cog_legend_items_response(response:List[dict]) -> List[LegendItemResponse]:
