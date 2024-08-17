@@ -189,7 +189,8 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
         cog_legend_items = retrieve.validate_cog_legend_items_response(legend_response)
     # 2. if no validated legends, check if there are any legends from the list
     if not cog_legend_items:
-        logging.debug(f"Cog-{cog_id[0:8]} - No validated legend items found, trying unvalidated")
+        if strtobool(validated):
+            logging.debug(f"Cog-{cog_id[0:8]} - No validated legend items found, trying unvalidated")
         # 2.1 loop through the list of legends and check if they are available
         for legend in parameters.get("legend", config_parm["systems"]["legend"]) or []:
             logging.debug(f"Cog-{cog_id[0:8]} - Trying legend {legend}")
