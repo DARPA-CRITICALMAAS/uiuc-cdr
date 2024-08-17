@@ -21,6 +21,7 @@ import convert
 from connector import CdrConnector
 from cmaas_utils.types import CMAAS_Map
 from cdr_schemas.cdr_responses.area_extractions import AreaType
+from cdr_endpoint_schemas import SystemId
 
 
 auth = HTTPBasicAuth()
