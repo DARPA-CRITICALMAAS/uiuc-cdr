@@ -55,7 +55,7 @@ class TestRetrieveCog:
     def test_retrieve_cog_area_extraction_by_system_id(self):
         log = init_test_log('TestRetrieveCog/test_retrieve_cog_area_extraction_by_system_id')
         cog_id = "5a06544690b6611f419f0c6f244776a536ad52915555555555515545c9b1ddb9"
-        test_system = SystemId(name='uncharted', version='0.0.4')
+        test_system = SystemId(name='uncharted-area', version='0.0.4')
         response_data = rt.retrieve_cog_area_extraction(self.con, cog_id, system_id=test_system)
         cog_area_extraction = rt.validate_cog_area_extraction_response(response_data)
         # Save Response 
@@ -85,7 +85,7 @@ class TestRetrieveCog:
     def test_retrieve_cog_legend_items_by_system_id(self):
         log = init_test_log('TestRetrieveCog/test_retrieve_cog_legend_items_by_system_id')
         test_system = SystemId(name='polymer', version='0.0.1')
-        response_data = rt.retrieve_cog_legend_items(self.con, self.cog_id, system_id=test_system)
+        response_data = rt.retrieve_cog_legend_items(self.con, self.cog_id, system_id=test_system, validated='true')
         cog_legend_items = rt.validate_cog_legend_items_response(response_data)
         # Save Response
         json_path = 'tests/logs/TestRetrieveCog/test_cog_legend_items_by_system_id.json'

@@ -206,8 +206,11 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             legend_response = retrieve.retrieve_cog_legend_items(cdr_connector, cog_id, system_id=systemid, validated="false")
             cog_legend_items = retrieve.validate_cog_legend_items_response(legend_response)
             if cog_legend_items:
-                break    
-    logging.debug(f"Cog-{cog_id[0:8]} - Found {len(cog_legend_items)} legend items")
+                break
+    if cog_legend_items is not None:    
+        logging.debug(f"Cog-{cog_id[0:8]} - Found {len(cog_legend_items)} legend items")
+    else: 
+        logging.debug(f"Cog-{cog_id[0:8]} - No legend items found")
 
     # checking for area, logic will be:
     cog_area_extraction = None
@@ -225,7 +228,10 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
         cog_area_extraction = retrieve.validate_cog_area_extraction_response(area_response)
         if cog_area_extraction:
             break    
-    logging.debug(f"Cog-{cog_id[0:8]} - Found {len(cog_area_extraction)} area items")
+    if cog_area_extraction is not None:
+        logging.debug(f"Cog-{cog_id[0:8]} - Found {len(cog_area_extraction)} area items")
+    else:
+        logging.debug(f"Cog-{cog_id[0:8]} - No area items found")
 
     # check what models to fire
     firemodels = parameters.get("model", [ ])

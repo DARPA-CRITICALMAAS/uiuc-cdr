@@ -32,6 +32,7 @@ class TestCallbacks:
         config["mode"] = 'test'
         config["prefix"] = os.getenv("PREFIX")
         config["callback_url"] = 'http://fakeurl.com'
+        config['systems'] = {'area' : ['uncharted-area'], 'legend' : ['polymer']}
         with open("cdrhook/models.json", "r") as f:
             config["models"] = json.load(f)
 
