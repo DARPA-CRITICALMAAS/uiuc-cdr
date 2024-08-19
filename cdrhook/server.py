@@ -96,6 +96,12 @@ def check_uncharted_event(event_id):
     r.raise_for_status()
     data = r.json()
 
+    # Jank emergency fix
+    for extraction in data:
+        cog_id = extraction["cog_id"]
+        process_cog(config["cdr_connector"], cog_id)
+    return
+
     # parse the infomation
     cog_id = None
     map_area = None
