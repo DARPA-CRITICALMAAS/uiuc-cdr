@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [unreleased] - 
+## [0.9.1] - 2024-08-20
+
+### Changed
+- events use same function as the manual submit of cogs
+- ask for 5000 items from extractions and area (instead of 10)
+- ask for validated map_area
 
 ## [0.9.0] - 2024-08-19
 

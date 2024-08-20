@@ -77,14 +77,14 @@ def validate_cog_system_versions_response(response:List[List[str]]) -> CogSystem
         system_versions.append(SystemId(name=item[0], version=item[1]))
     return CogSystemVersionsSchema(system_versions=system_versions)
 
-def retrieve_cog_area_extraction(connection:CdrConnector, cog_id:str, system_id:SystemId=None) -> List[dict]:
+def retrieve_cog_area_extraction(connection:CdrConnector, cog_id:str, system_id:SystemId=None, validated:str="false", items:int=5000) -> List[dict]:
     """
     Retreive area extraction data for a given cog from the cdr. Note that while the code for filtering by system_id is 
     ready on our side, the cdr does not yet provide support for this and will just ignore the addtional query info.
     """
-    endpoint_url = f"{connection.cdr_url}/v1/features/{cog_id}/area_extractions"
+    endpoint_url = f"{connection.cdr_url}/v1/features/{cog_id}/area_extractions?validated={validated.lower()}&size={items}"
     if system_id is not None:
-        endpoint_url += f"?system_version={system_id.name}__{system_id.version}"
+        endpoint_url += f"&system_version={system_id.name}__{system_id.version}"
     return retrieve_endpoint(connection, endpoint_url)
 
 def validate_cog_area_extraction_response(response:List[dict]) -> List[AreaExtractionResponse]:
@@ -96,9 +96,9 @@ def validate_cog_area_extraction_response(response:List[dict]) -> List[AreaExtra
         area_extractions.append(AreaExtractionResponse.model_validate(item))
     return area_extractions
 
-def retrieve_cog_legend_items(connection:CdrConnector, cog_id:str, system_id:SystemId=None, validated:str="false") -> List[dict]:
+def retrieve_cog_legend_items(connection:CdrConnector, cog_id:str, system_id:SystemId=None, validated:str="false", items:int=5000) -> List[dict]:
     # Get all legend items for a cog
-    endpoint_url = f"{connection.cdr_url}/v1/features/{cog_id}/legend_items?validated={validated.lower()}"
+    endpoint_url = f"{connection.cdr_url}/v1/features/{cog_id}/legend_items?validated={validated.lower()}&size={items}"
     if system_id is not None:
         endpoint_url += f"&system_version={system_id.name}__{system_id.version}"
     return retrieve_endpoint(connection, endpoint_url)
