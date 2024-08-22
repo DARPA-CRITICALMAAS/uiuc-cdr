@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.2] - 2024-08-22
+
+### Added
+- monitor now will return unack'd messages as well waiting messages
+
+### Fixed
+- search now works for querying the list of jobs
+
 ## [0.9.1] - 2024-08-20
 
 ### Changed

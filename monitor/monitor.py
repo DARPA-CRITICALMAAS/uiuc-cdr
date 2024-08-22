@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import requests
+from urllib.parse import urlparse, parse_qs
 
 # ----------------------------------------------------------------------
 # WEB SERVER
@@ -21,6 +22,9 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
       self.path = '/'
 
     if self.path.startswith('queues.json'):
+      query = urlparse(self.path).query
+      query_components = parse_qs(urlparse(self.path).query)
+      search = query_components.get("search", [""])[0]
       queues = {}
       try:
         rabbitmq_mgmt_url = os.environ.get('RABBITMQ_MGMT_URL', 'http://rabbitmq:15672')
@@ -29,22 +33,30 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
         response = requests.get(f"{rabbitmq_mgmt_url}/api/queues/%2F", auth=(rabbitmq_username, rabbitmq_password), timeout=5)
         response.raise_for_status()
         for data in response.json():
+          if search not in data['name'].split('.')[0]:
+            continue
           if data['name'].endswith(".error"):
             queue = data['name'][:-6]
             consumers = data['consumers']
             messages = None
+            total = None
+            unack = None
             unknown = 0
             errors = data['messages']
           elif data['name'].endswith(".unknown"):
             queue = data['name'][:-8]
             consumers = data['consumers']
             messages = None
+            total = None
+            unack = None
             unknown = data['messages']
             errors = 0
           else:
             queue = data['name']
             consumers = data['consumers']
             messages = f'{data["messages"]} / {data["messages_unacknowledged"]}'
+            total = data["messages"]
+            unack = data["messages_unacknowledged"]
             unknown = 0
             errors = 0
 
@@ -53,6 +65,10 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
               queues[queue]['consumers'] = consumers
             if messages:
               queues[queue]['messages'] = messages
+            if total:
+              queues[queue]['total'] = total
+            if unack:
+              queues[queue]['unack'] = unack
             if errors != 0:
               queues[queue]['errors'] = errors
             if unknown != 0:
@@ -62,6 +78,8 @@ class MyServer(http.server.SimpleHTTPRequestHandler):
               'queue': queue,
               'consumers': consumers,
               'messages': messages,
+              'total': total,
+              'unack': unack,
               'unknown': unknown,
               'errors': errors,
             }
