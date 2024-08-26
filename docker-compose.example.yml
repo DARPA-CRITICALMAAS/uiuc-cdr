@@ -1,0 +1,23 @@
+services:
+  cdrhook:
+    environment:
+      SYSTEM_NAME: ${SYSTEM_NAME}
+      SYSTEM_VERSION: ${SYSTEM_VERSION}
+  golden_muscat:
+    environment:
+      CDR_SYSTEM: ${SYSTEM_NAME}
+      CDR_SYSTEM_VERSION: ${SYSTEM_VERSION}
+
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/data
+      o: bind
+  output:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/volumes/output
+      o: bind
