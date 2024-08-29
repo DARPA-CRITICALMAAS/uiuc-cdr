@@ -98,7 +98,7 @@ services:
   # DATA PROCESSING PIPELINE
   # use one, or more, per model to be executed
   # ----------------------------------------------------------------------
-  pipeline:
+  golden_muscat:
     image: ncsa/criticalmaas-pipeline:latest
     build: ../uiuc-pipeline
     runtime: nvidia
@@ -121,6 +121,8 @@ services:
       - /feedback
       - --amqp
       - "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      - --inactive_timeout
+      - "86000"
       - --model
       - golden_muscat
     restart: "unless-stopped"
@@ -131,9 +133,21 @@ services:
       - "feedback:/feedback"
 
   # ----------------------------------------------------------------------
-  # DATA PROCESSING PIPELINE
-  # use one, or more, per model to be executed
+  # DOWNLOADER and UPLOADER
   # ----------------------------------------------------------------------
+  downloader:
+    image: ncsa/criticalmaas-downloader:latest
+    build: uploader
+    restart: "unless-stopped"
+    profiles:
+      - pipeline
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+    volumes:
+      - "data:/data"
+
   uploader:
     image: ncsa/criticalmaas-uploader:latest
     build: uploader
@@ -157,3 +171,4 @@ volumes:
   data:
   logs:
   output:
+
