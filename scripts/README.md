@@ -1,6 +1,6 @@
 # Utility scripts
 
-This folder contains utility scripts that are used on the HPC to monitor the queues and start models on the HPC.
+This folder contains utility scripts that are used on the HPC system to monitor queues and start models.
 
 *upload_download.sh* - This script will download and start 2 apptainer containers (if not already started) and tail the output logs.
 *model_launcher.sh* - This script will check if any models are needed to be run and start them. This will launch about 1 pipeline for every 10 waiting jobs.
