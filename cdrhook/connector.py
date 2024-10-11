@@ -98,3 +98,33 @@ class CdrConnector(BaseModel):
     def __del__(self):
         if self.registration is not None:
             self.unregister()
+
+    def retrieve_endpoint(self, endpoint_url:str, schema:BaseModel=None, headers:dict=None):
+        """
+        Retrieve data from a CDR endpoint. If a schema is provided, the data will be converted to that schema and validated.
+
+        Args:
+            endpoint_url (str): The URL of the endpoint to retrieve data from.
+            schema (BaseModel, optional): A Pydantic schema to convert the data to. Defaults to None.
+            headers (dict, optional): A dictionary of headers to include in the request.  Defaults to None.
+        
+        Returns:
+            A dictionary of the data from the endpoint or
+            An instance of the schema object if a schema was provided.
+            Data can potentionally be a list if the endpoint returns multiple items.
+
+        Raises:
+            requests.HTTPError: If the request fails
+            pydantic.ValidationError: If the data does not match the provided schema
+        """
+        if headers is None:
+            headers = {'Authorization': f'Bearer {self.token}'}
+        logging.debug(f"Retrieving {endpoint_url}")
+        r = requests.get(endpoint_url, headers=headers)
+        r.raise_for_status()
+        response = r.json()
+        if schema is not None:
+            if isinstance(response, list):
+                return [schema.model_validate(item) for item in response]
+            return schema.model_validate(response)
+        return response
