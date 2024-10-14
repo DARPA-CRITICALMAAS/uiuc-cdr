@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+- Updated cmaas_utils to version 2.0
+- Updated cdr_schemas to version 4.9.0
+- Changed retieve_endpoint to be memver function of cdrConnector
+- Updated retrieve and validate functions to be one function, with optional parameters.
+- Updated Server.py to for new retrieve and validate calls
+- Convert code moved to cmaas_utils from this repo
+- Updated Server.py to change convert function calls to use cmaas_utils version
+- Updated CogMetadataSchema to conform with cdr_schemas v4.9.0
+- Updated FeatureResults to conform with cdr_schemas v4.9.0
+- Fixed import paths to allow for tests to be run
+- Added docstrings for cdrconnector and retrieve api functions
+### Tests
+- Updated retrieve tests 
+- Removed validate test functions
+- Removed convert tests
+- Fixed remaining tests that were failing
+
 ## [0.9.2] - 2024-08-22
 
 ### Added

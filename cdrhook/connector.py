@@ -4,6 +4,9 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, AnyUrl
 
 class CdrConnector(BaseModel):
+    """
+    Class to handle registration and communication with the CDR API.
+    """
     system_name : str = Field(
         description="The name of the system registering with the CDR")
     system_version : str = Field(
@@ -33,7 +36,16 @@ class CdrConnector(BaseModel):
     
     def register(self):
         """
-        Register our system to the CDR using the app_settings
+        Register our system to the CDR using the app_settings. The register call can fail if
+        another system with the same name and version is already registered, if this happens
+        you can manual deregister the other system through the CDR Docs API or change the name
+        and version of your system.
+
+        Returns:
+            str: The registration ID returned by the CDR
+
+        Raises:
+            requests.HTTPError: If the request fails
         """
         headers = {'Authorization': f'Bearer {self.token}'}
         registration = {
