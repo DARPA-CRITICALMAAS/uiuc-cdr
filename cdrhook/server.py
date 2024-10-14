@@ -16,7 +16,7 @@ import time
 from typing import Optional
 from concurrent.futures import ThreadPoolExecutor
 
-from . import retrieve
+from .retrieve import retrieve_cog_area_extraction, retrieve_cog_legend_items, retrieve_cog_system_versions, retrieve_cog_download
 import cmaas_utils.cdr as convert
 from .connector import CdrConnector
 from cmaas_utils.types import CMAAS_Map
@@ -134,14 +134,14 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     logging.info(f"Cog:{cog_id[0:8]} - Processing cog {cog_id}")
 
     # Retrieve available system versions for this cog and check if there are any valid systems posted
-    cog_system_versions = retrieve.retrieve_cog_system_versions(cdr_connector, cog_id)
+    cog_system_versions = retrieve_cog_system_versions(cdr_connector, cog_id)
     logging.debug(f"Cog-{cog_id[0:8]} - Available system versions : {cog_system_versions.pretty_str()}")
 
     # checking for legends, logic will be:
     # 1. check if cog has validated legends, if it does, use them
     cog_legend_items = None
     if strtobool(validated):
-        cog_legend_items = retrieve.retrieve_cog_legend_items(cdr_connector, cog_id, validated=validated)
+        cog_legend_items = retrieve_cog_legend_items(cdr_connector, cog_id, validated=validated)
     # 2. if no validated legends, check if there are any legends from the list
     if not cog_legend_items:
         if strtobool(validated):
@@ -157,7 +157,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             if not systemid:
                 continue
             # 2.2 fetch the legend items for the system
-            cog_legend_items = retrieve.retrieve_cog_legend_items(cdr_connector, cog_id, system_id=systemid, validated="false")
+            cog_legend_items = retrieve_cog_legend_items(cdr_connector, cog_id, system_id=systemid, validated="false")
             if cog_legend_items:
                 break
     if cog_legend_items is not None:    
@@ -169,7 +169,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
     # 1. check if cog has validated legends, if it does, use them
     cog_area_extraction = None
     if strtobool(validated):
-        cog_area_extraction = retrieve.retrieve_cog_area_extraction(cdr_connector, cog_id, validated=validated)
+        cog_area_extraction = retrieve_cog_area_extraction(cdr_connector, cog_id, validated=validated)
     # 2. if no validated legends, check if there are any legends from the list
     if not cog_area_extraction:
         for area in parameters.get("area", config_parm["systems"]["area"]) or []:
@@ -182,7 +182,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             if not systemid:
                 continue
             # 2.2 fetch the area items for the system
-            cog_area_extraction = retrieve.retrieve_cog_area_extraction(cdr_connector, cog_id, system_id=systemid)
+            cog_area_extraction = retrieve_cog_area_extraction(cdr_connector, cog_id, system_id=systemid)
             if cog_area_extraction:
                 break    
     if cog_area_extraction is not None:
@@ -244,7 +244,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
         raise ValueError(f"Cannot process {cog_id}, no models were able to be started")
         
     # Retrieve download link for the geotiff
-    cog_download = retrieve.retrieve_cog_download(cdr_connector, cog_id)
+    cog_download = retrieve_cog_download(cdr_connector, cog_id)
 
     # Convert cdr obects to cmass objects for saving
     layout = convert.convert_cdr_area_extraction_to_layout(cog_area_extraction)
