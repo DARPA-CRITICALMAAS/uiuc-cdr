@@ -5,8 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-- Partily fixed cog_results
-- Changed retrieve_cog_results to use cdr_response.CogMeta format
+- Partially fixed cog_results so that it functions but doesn't include the point features.
+- Changed retrieve_cog_metadata to use cdr_response.CogMeta format
 - Updated cmaas_utils to version 2.0
 - Updated cdr_schemas to version 4.9.0
 - Changed retieve_endpoint to be member function of cdrConnector
