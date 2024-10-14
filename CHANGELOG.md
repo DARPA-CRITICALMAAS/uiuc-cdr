@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 - Updated cmaas_utils to version 2.0
 - Updated cdr_schemas to version 4.9.0
-- Changed retieve_endpoint to be memver function of cdrConnector
+- Changed retieve_endpoint to be member function of cdrConnector
 - Updated retrieve and validate functions to be one function, with optional parameters.
 - Updated Server.py to for new retrieve and validate calls
 - Convert code moved to cmaas_utils from this repo
