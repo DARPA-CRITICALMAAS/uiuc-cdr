@@ -4,9 +4,10 @@ from dotenv import load_dotenv
 
 import cdrhook.retrieve as rt
 from cdrhook.connector import CdrConnector
-from cdrhook.cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogMetadataSchema, CogDownloadSchema
+from cdrhook.cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogDownloadSchema
 from cdr_schemas.cdr_responses.area_extractions import AreaExtractionResponse
 from cdr_schemas.cdr_responses.legend_items import LegendItemResponse
+from cdr_schemas.cdr_responses.cogs import CogMeta
 from cdr_schemas.map_results import MapResults
 from tests.utilities import init_test_log, dumps_list
 
@@ -109,20 +110,21 @@ class TestRetrieveCog:
         with open(json_path, "w") as fh:
             fh.write(response_data.model_dump_json())
         # Check is response is valid
-        assert isinstance(response_data, CogMetadataSchema)
+        assert isinstance(response_data, CogMeta)
         log.info("Test passed successfully")
 
-    # def test_retrieve_cog_results(self):
-    #     log = init_test_log("TestRetrieveCog/test_retrieve_cog_results")
-    #     response_data = rt.retrieve_cog_results(self.con, self.cog_id)
-    #     # Save Response
-    #     json_path = "tests/logs/TestRetrieveCog/test_cog_results_response.json"
-    #     log.info(f"Saving result to {json_path}")
-    #     with open(json_path, 'w') as fh:
-    #         fh.write(dumps_list(response_data))
-    #     # Check if response is not empty
-    #     assert isinstance(response_data, MapResults)
-    #     log.info("Test passed successfully")
+    def test_retrieve_cog_results(self):
+        log = init_test_log("TestRetrieveCog/test_retrieve_cog_results")
+        cog_results = rt.retrieve_cog_results(self.con, self.cog_id)
+        # Save Response
+        json_path = "tests/logs/TestRetrieveCog/test_cog_results_response.json"
+        log.info(f"Saving result to {json_path}")
+        with open(json_path, 'w') as fh:
+            fh.write(dumps_list(cog_results))
+        # Check if response is not empty
+        for result in cog_results:
+            assert isinstance(result, MapResults)
+        log.info("Test passed successfully")
 
     def test_retrieve_cog_download(self):
         log = init_test_log("TestRetrieveCog/test_retrieve_cog_download")

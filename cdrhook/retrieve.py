@@ -1,9 +1,11 @@
 from typing import List, Literal
 from .connector import CdrConnector
-from .cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogMetadataSchema, CogDownloadSchema
+from .cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogDownloadSchema
 from cdr_schemas.cdr_responses.area_extractions import AreaExtractionResponse
 from cdr_schemas.cdr_responses.legend_items import LegendItemResponse
+from cdr_schemas.cdr_responses.cogs import CogMeta
 from cdr_schemas.map_results import MapResults
+
 
 # region Cog Endpoints
 def retrieve_cog_download(connection:CdrConnector, cog_id:str) -> CogDownloadSchema:
@@ -24,7 +26,7 @@ def retrieve_cog_download(connection:CdrConnector, cog_id:str) -> CogDownloadSch
     endpoint_url = f"{connection.cdr_url}/v1/maps/cog/{cog_id}"
     return connection.retrieve_endpoint(endpoint_url, schema=CogDownloadSchema)
 
-def retrieve_cog_metadata(connection:CdrConnector, cog_id:str) -> CogMetadataSchema:
+def retrieve_cog_metadata(connection:CdrConnector, cog_id:str) -> CogMeta:
     """
     Retrieve the metadata for a cog.
 
@@ -40,11 +42,11 @@ def retrieve_cog_metadata(connection:CdrConnector, cog_id:str) -> CogMetadataSch
         pydantic.ValidationError: If the data returned from the CDR does not match the CogMetadataSchema format.
     """
     endpoint_url = f"{connection.cdr_url}/v1/maps/cog/meta/{cog_id}"
-    return connection.retrieve_endpoint(endpoint_url, schema=CogMetadataSchema)
+    return connection.retrieve_endpoint(endpoint_url, schema=CogMeta)
 
 def retrieve_cog_results(connection:CdrConnector, cog_id:str) -> List[MapResults]:
     """
-    Retrieve the georeferencing and segmentation results for a cog.
+    Retrieve the georeferencing and segmentation results for a cog. Currently drops the point feature results due to issues in how CDR returns data.
 
     Args:
         connection (CdrConnector): A CdrConnector with a registered connection.
@@ -57,20 +59,41 @@ def retrieve_cog_results(connection:CdrConnector, cog_id:str) -> List[MapResults
         requests.HTTPError: If the request fails
         pydantic.ValidationError: If the data returned from the CDR does not match the MapResults format.
     """
+    # Data will be returned in the format it was orginally uploaded in. This means we have to
+    # support every version of MapResults that has existed. 
+    def fix_map_unit_format(d:dict) -> dict:
+        for er in d['extraction_results']:
+            for pfr in er['polygon_feature_results']:
+                if pfr['map_unit'] is None:
+                    pfr['map_unit'] = []
+                if not isinstance(pfr['map_unit'], list):
+                    pfr["map_unit"] = [pfr['map_unit']]
+        return d
+    def drop_point_features(d:dict) -> dict:
+        # Can't seem to get the point features to work so just dropping them. Too many different versions to fix. 
+        for er in d['extraction_results']:
+            er['point_feature_results'] = []
+            # for pfr in er['point_feature_results']:
+            #     for pf in pfr['point_features']:
+            #         if pf['features'] is not None:
+            #             for f in pf['features']:
+            #                 if f['properties']['bbox'] is None:
+            #                     f['properties']['bbox'] = []
+        # extraction_results.11.point_feature_results.1.point_features.features.0.properties.bbox
+        return d
     endpoint_url = f"{connection.cdr_url}/v1/maps/cog/{cog_id}/results"
-    return connection.retrieve_endpoint(endpoint_url, schema=MapResults)
+    response_data = connection.retrieve_endpoint(endpoint_url)
+    if isinstance(response_data, dict):
+        response_data = [response_data]
+    results = []
+    for response in response_data:
+        response['cog_id'] = cog_id
+        response = fix_map_unit_format(response)
+        response = drop_point_features(response)
+        results.append(MapResults.model_validate(response))
+    return results
     # response_data['cog_id'] = cog_id # Need to add cog_id to the response to conform to cdr_schema
     # return response_data
-
-def validate_cog_results_response(response:dict) -> MapResults:
-    """
-    Convert the response from the cdr into a CogResultsSchema object, validating the data in the process. Does not
-    convert point_feature_results as they have validation errors in the data that we are sent.
-    """
-    # Drop point_feature_results as they have validation errors
-    for er in response['extraction_results']:
-        er['point_feature_results'] = []
-    return MapResults.model_validate(response)
 
 def retrieve_cog_system_versions(connection:CdrConnector, cog_id:str, type:Literal['any','legend_item', 'polygon', 'line', 'point', 'area_extraction']='any') -> CogSystemVersionsSchema:
     """

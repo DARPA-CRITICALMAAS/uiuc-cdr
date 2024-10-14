@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+- Partily fixed cog_results
+- Changed retrieve_cog_results to use cdr_response.CogMeta format
 - Updated cmaas_utils to version 2.0
 - Updated cdr_schemas to version 4.9.0
 - Changed retieve_endpoint to be member function of cdrConnector
@@ -21,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Removed validate test functions
 - Removed convert tests
 - Fixed remaining tests that were failing
+- Renabled test_retrieve_cog_results
 
 ## [0.9.2] - 2024-08-22
 
