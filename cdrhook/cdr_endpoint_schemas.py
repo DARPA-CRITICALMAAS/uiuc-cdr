@@ -34,35 +34,3 @@ class CogSystemVersionsSchema(BaseModel):
         outstr += "\n)"
         return outstr
 
-# # Returned by cog_metadata endpoint
-class GeoJsonCoord(BaseModel):
-    type: str
-    coordinates: List[List[List[float]]]
-
-class CogMetadataSchema(BaseModel):
-    citation: str
-    ngmdb_prod: str
-    scale: int
-    has_part_names: List[str]
-    ngmdb_item: int
-    cog_id: str
-    publisher: str
-    cog_url: str
-    provider_name: str
-    display_links_str: str
-    cog_size: int
-    authors: List[str]
-    provider_url: str
-    original_download_url: str
-    no_map: bool
-    thumbnail_url: str
-    state: Optional[str]
-    cog_name: str
-    publish_year: int
-    quadrangle: Optional[str]
-    alternate_name: str
-    keywords: List[str]
-    best_bounds_geojson: GeoJsonCoord
-    georeferenced_count : int
-    validated_count : int
-
