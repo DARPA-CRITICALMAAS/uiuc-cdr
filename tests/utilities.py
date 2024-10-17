@@ -1,7 +1,6 @@
 import os
 import logging
 
-
 def init_test_log(name, level=logging.DEBUG, writemode="w"):
     log_dir = os.path.join("tests/logs", os.path.dirname(name))
     os.makedirs(log_dir, exist_ok=True)
@@ -13,3 +12,12 @@ def init_test_log(name, level=logging.DEBUG, writemode="w"):
     log.setLevel(level)
     log.info(f"Starting {name}")
     return log
+
+def dumps_list(data):
+    outstr = '['
+    for item in data:
+        outstr += item.model_dump_json()
+        outstr += ','
+    outstr = outstr[:-1]
+    outstr += ']'
+    return outstr

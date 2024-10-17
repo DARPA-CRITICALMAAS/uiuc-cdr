@@ -10,4 +10,4 @@ rasterio
 git+https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git@v0.4.9
 
 --extra-index-url https://test.pypi.org/simple/
-cmaas_utils==0.1.20
+cmaas_utils==0.2.0
