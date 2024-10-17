@@ -20,9 +20,9 @@ import cmaas_utils.cdr as convert
 from cmaas_utils.types import CMAAS_Map
 from cdr_schemas.cdr_responses.area_extractions import AreaType
 
-from cdrhook.retrieve import retrieve_cog_area_extraction, retrieve_cog_legend_items, retrieve_cog_system_versions, retrieve_cog_download
-from cdrhook.connector import CdrConnector
-from cdrhook.cdr_endpoint_schemas import SystemId
+from retrieve import retrieve_cog_area_extraction, retrieve_cog_legend_items, retrieve_cog_system_versions, retrieve_cog_download
+from connector import CdrConnector
+from cdr_endpoint_schemas import SystemId
 
 
 auth = HTTPBasicAuth()
