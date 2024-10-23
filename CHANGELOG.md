@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.9.3] - 2024-10-23
+
+### Changed
 - Updated cmaas_utils to version 2.0
 - Updated cdr_schemas to version 4.9.0
 - Changed retieve_endpoint to be member function of cdrConnector
@@ -16,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated FeatureResults to conform with cdr_schemas v4.9.0
 - Fixed import paths to allow for tests to be run
 - Added docstrings for cdrconnector and retrieve api functions
+  
 ### Tests
 - Updated retrieve tests 
 - Removed validate test functions
