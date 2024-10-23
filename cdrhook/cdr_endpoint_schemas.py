@@ -39,6 +39,20 @@ class GeoJsonCoord(BaseModel):
     type: str
     coordinates: List[List[List[float]]]
 
+class CMACoord(BaseModel):
+    type: str
+    coordinates: List[List[List[List[float]]]]
+
+class CmaInfo(BaseModel):
+    extent: CMACoord
+    resolution: List[float]
+    description: str
+    creation_date: str
+    cma_id : str
+    crs : str
+    mineral : str
+    download_url : str
+
 class CogMetadataSchema(BaseModel):
     citation: str
     ngmdb_prod: str
@@ -62,7 +76,8 @@ class CogMetadataSchema(BaseModel):
     quadrangle: Optional[str]
     alternate_name: str
     keywords: List[str]
-    best_bounds_geojson: GeoJsonCoord
+    best_bounds: GeoJsonCoord
+    cmas: List[CmaInfo]
     georeferenced_count : int
     validated_count : int
 
