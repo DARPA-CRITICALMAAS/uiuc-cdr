@@ -82,8 +82,8 @@ export PIPELINE_VERSION=$(echo ${PIPELINE_VERSION} | sed 's/v//')
 # -------------------------------------------------------
 # download latest released docker-compose file
 # -------------------------------------------------------
-if [[ "${CDR_TAG}" != v* ]]; then
-    URL="https://raw.githubusercontent.com/DARPA-CRITICALMAAS/uiuc-cdr/refs/heads/${CDR_TAG}/"
+if [[ -n "${CDR_BRANCH}" ]]; then
+    URL="https://raw.githubusercontent.com/DARPA-CRITICALMAAS/uiuc-cdr/refs/heads/${CDR_BRANCH}/"
 else
     URL="https://raw.githubusercontent.com/DARPA-CRITICALMAAS/uiuc-cdr/refs/tags/${CDR_TAG}/"
 fi

@@ -110,6 +110,7 @@ services:
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       PREFIX: ""
+    ipc: host
     command:
       - -v 
       - --data
