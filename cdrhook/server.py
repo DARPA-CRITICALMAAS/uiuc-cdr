@@ -26,7 +26,7 @@ from cdr_endpoint_schemas import SystemId
 
 
 auth = HTTPBasicAuth()
-cdr_url = "https://api.cdr.land"
+cdr_url = os.getenv("CDR_URL","https://api.cdr.land")
 
 config = { }
 cdr_connector = None
@@ -422,6 +422,7 @@ def create_app():
     cdr_connector = CdrConnector(
         system_name=os.getenv("SYSTEM_NAME"),
         system_version=os.getenv("SYSTEM_VERSION"),
+        cdr_url=os.getenv("CDR_URL", "https://api.cdr.land"),
         token=os.getenv("CDR_TOKEN"),
         callback_url=os.getenv("CALLBACK_URL")+'/hook',
         callback_secret=os.getenv("CALLBACK_SECRET"),

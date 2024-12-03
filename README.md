@@ -1,3 +1,33 @@
+# UIUC-CDR
+
+This repository contains the hook to receive messages from the CDR and starts the processing. The full stack consists of containers to proxy incoming http requests to the correct containers (traefik), container to handle the hooks (cdrhook), container to handle all messages (rabbitmq), show the status (monitor), download data (downloader) and upload the data (uploader) as well as a single model that is executed on the data (icy-resin).
+
+# QuickStart
+
+To be able to run you will need some files, to make this easier we have created a quickstart shell script that you can run. This will download all files needed as well as create some default value files.
+
+```
+curl -o quickstart.sh -s -L https://raw.githubusercontent.com/DARPA-CRITICALMAAS/uiuc-cdr/refs/heads/main/quickstart.sh
+chmod 755 quickstart.sh
+./quickstart.sh
+```
+
+The first time you run this, it will create four files:
+- `secrets.sh` file that you can edit to change any variables needed
+- `docker-compose.override.yml` these are changes to the docker-compose file
+- `docker-compose.yml` *DO NOT EDIT* this file will be downloaded each time to make sure you have the latest version
+- `.env` *DO NOT EDIT* this will be created from the secrets.sh file
+
+Edit `secrets.sh` and `docker-compose.override.yml` to fit your environment.At a minumum you will need to change the `CDR_TOKEN`, but it is highly recommended to change `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD` and `CDRHOOK_SECRET`. If you only want to run the cdrhook, change the PROFILE to be `cdrhook`.
+
+Once you have the secrets.sh file setup, you can use `quickstart.sh` to start the full stack.To restart it, simpl run `quickstart.sh` again.
+
+To only start the pipeline, you can all four files to the GPU machine, change the `PROFILE` in `secrets.sh` to be pipeline and run `quickstart.sh`.
+
+To stop the stack you can use `docker compose --profile allinone down`, you can use the profile allinone even if you only start the pipeline or cdrhook.
+
+If you use the cdrhook profile, it will not start traefik by default. You can manually start that in this case with `docker compose --profile traefik up -d`
+
 # CDR Hook for NCSA pipeline
 
 This repository contains the hook to receive messages from the CDR and starts the processing. The full stack consists of a few containers that work together:
@@ -6,7 +36,7 @@ This repository contains the hook to receive messages from the CDR and starts th
 - **rabbitmq**: The orchestrator of all the work, all other containers connect to this and will receive work. If any of the messages can not be handled it will be added to the `<queue>.error` with the exception attached to the original message.
 - **cdrhook**: this is the entry point for all work, it will register with the CDR and receive messages when new work needs to be done. When a message arrives it will check to see if all necessary metadata is available and if so, it will send a message to the `download` queue.
 - **downloader**: this will download the image and the metadata to a shared folder that can be used by the actual processing container. This can run on a different server than the cdrhook, but does need to have access to the same storage system that the pipeline uses. Once it is downloaded it will send a message to each of the pipelines that run a model using the `process_<model>` queue name.
-- **pipeline**: this will do the actual inference of the map, it will use the map and the metadata and find all the legends and appropriate regions in the map and write the result to the output folder ready for the CDR, and send a message to the `upload` queue.
+- **icy-resin**: this will do the actual inference of the map, it will use the map and the metadata and find all the legends and appropriate regions in the map and write the result to the output folder ready for the CDR, and send a message to the `upload` queue.
 - **uploader**: this will upload the processed data from the pipeline to the CDR and move the message to `completed` queue.
 - **monitor**: this not really part of the system, but will show the number of messages in the different queues, making it easy to track overall progress.
 
