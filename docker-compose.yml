@@ -4,7 +4,7 @@ services:
   # REVERSE PROXY
   # ----------------------------------------------------------------------
   traefik:
-    image: "traefik:v2.11"
+    image: "traefik:munster"
     command:
       - --log.level=INFO
       - --api=true
@@ -13,26 +13,19 @@ services:
       # Entrypoints
       - --entrypoints.http.address=:80
       - --entrypoints.http.http.redirections.entryPoint.to=https
-      - --entrypoints.https.address=:443
-      - --entrypoints.https.http.tls.certresolver=myresolver
-      # letsencrypt
-      - --certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL}
-      - --certificatesresolvers.myresolver.acme.storage=/config/acme.json
-      # uncomment to use testing certs
-      #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.myresolver.acme.httpchallenge=true
-      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
       # Docker setup
       - --providers.docker=true
       - --providers.docker.endpoint=unix:///var/run/docker.sock
       - --providers.docker.exposedbydefault=false
       - --providers.docker.watch=true
     restart: "unless-stopped"
+    profiles:
+      - traefik
+      - allinone
     security_opt:
       - no-new-privileges:true
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - "traefik:/config"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -44,6 +37,9 @@ services:
     image: rabbitmq:3.13-management
     hostname: rabbitmq
     restart: unless-stopped
+    profiles:
+      - cdrhook
+      - allinone
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME:-guest}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-guest}"
@@ -55,16 +51,19 @@ services:
   # CDR HOOK
   # ----------------------------------------------------------------------
   cdrhook:
-    image: ncsa/criticalmaas-cdr:latest
+    image: ncsa/criticalmaas-cdr:${CDRHOOK_VERSION:-latest}
     hostname: cdrhook
-    build: cdrhook
     restart: unless-stopped
+    profiles:
+      - cdrhook
+      - allinone
     depends_on:
       - rabbitmq
     environment:
+      CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
       CDR_KEEP_EVENT: "no"
-      CALLBACK_URL: "https://${SERVER_NAME}/cdr"
+      CALLBACK_URL: "${CALLBACK_URL}"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
       CALLBACK_PASSWORD: "${CALLBACK_PASSWORD}"
@@ -80,10 +79,13 @@ services:
   # RABBITMQ MONITOR
   # ----------------------------------------------------------------------
   monitor:
-    image: ncsa/criticalmaas-monitor:latest
+    image: ncsa/criticalmaas-monitor:${CDRHOOK_VERSION:-latest}
     hostname: monitor
     build: monitor
     restart: unless-stopped
+    profiles:
+      - cdrhook
+      - allinone
     depends_on:
       - rabbitmq
     environment:
@@ -98,17 +100,17 @@ services:
   # DATA PROCESSING PIPELINE
   # use one, or more, per model to be executed
   # ----------------------------------------------------------------------
-  golden_muscat:
-    image: ncsa/criticalmaas-pipeline:latest
-    build: ../uiuc-pipeline
+  icy-resin:
+    image: ncsa/criticalmaas-pipeline:${PIPELINE_VERSION:-latest}
     runtime: nvidia
+    restart: "unless-stopped"
     profiles:
       - pipeline
-    depends_on:
-      - rabbitmq
+      - allinone
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       PREFIX: ""
+    ipc: host
     command:
       - -v 
       - --data
@@ -123,9 +125,10 @@ services:
       - "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
       - --inactive_timeout
       - "86000"
+      - --output_types
+      - cdr_json
       - --model
-      - golden_muscat
-    restart: "unless-stopped"
+      - icy_resin
     volumes:
       - "data:/data"
       - "logs:/logs"
@@ -136,27 +139,24 @@ services:
   # DOWNLOADER and UPLOADER
   # ----------------------------------------------------------------------
   downloader:
-    image: ncsa/criticalmaas-downloader:latest
-    build: uploader
+    image: ncsa/criticalmaas-downloader:${CDRHOOK_VERSION:-latest}
     restart: "unless-stopped"
     profiles:
       - pipeline
-    depends_on:
-      - rabbitmq
+      - allinone
     environment:
       RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
     volumes:
       - "data:/data"
 
   uploader:
-    image: ncsa/criticalmaas-uploader:latest
-    build: uploader
+    image: ncsa/criticalmaas-uploader:${CDRHOOK_VERSION:-latest}
     restart: "unless-stopped"
     profiles:
       - pipeline
-    depends_on:
-      - rabbitmq
+      - allinone
     environment:
+      CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
       RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
       PREFIX: ""

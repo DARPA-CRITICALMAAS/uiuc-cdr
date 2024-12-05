@@ -3,6 +3,7 @@
 venv
 __pycache__
 docker-compose.override.yml
+secrets.sh
 
 *.pyc
 *.DS_Store
