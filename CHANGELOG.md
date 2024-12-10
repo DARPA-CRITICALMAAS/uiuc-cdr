@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.9.4] - 2024-12-10
+
+### Added
+- quickstart.sh to get started witht the cdrhook, this will download the docker-compose file and create files to store information, finally this will start the full stack.
+
+### Changed
+- split doker-compose into different pipelines
+- updated cmas-utils to 0.2.1
 
 ## [0.9.3] - 2024-10-23
 
