@@ -1,0 +1,7 @@
+cluster.name: "elasticsearch"
+server.name: es01
+#network.host: localhost
+network.host: 0.0.0.0
+# getting ssl to work
+xpack.security.enabled: true
+xpack.security.autoconfiguration.enabled: true
