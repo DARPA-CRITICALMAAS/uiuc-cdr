@@ -133,10 +133,11 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      CDR_URL: "${CDR_URL}"
+#      CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
       CDR_KEEP_EVENT: "no"
-      CALLBACK_URL: "${CALLBACK_URL}"
+      #CALLBACK_URL: "${CALLBACK_URL}"
+      CALLBACK_URL: "https://${SERVER_NAME}/cdr"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
       CALLBACK_PASSWORD: "${CALLBACK_PASSWORD}"
@@ -229,7 +230,7 @@ services:
       - pipeline
       - allinone
     environment:
-      CDR_URL: "${CDR_URL}"
+#      CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
       RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
       PREFIX: ""
