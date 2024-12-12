@@ -98,9 +98,9 @@ services:
     image: rabbitmq:3.13-management
     hostname: rabbitmq
     restart: unless-stopped
-    profiles:
-      - cdrhook
-      - allinone
+#    profiles:
+#      - cdrhook
+#      - allinone
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME:-guest}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-guest}"
@@ -115,16 +115,16 @@ services:
     image: ncsa/criticalmaas-cdr:${CDRHOOK_VERSION:-latest}
     hostname: cdrhook
     restart: unless-stopped
-    profiles:
-      - cdrhook
-      - allinone
+#    profiles:
+#      - cdrhook
+#      - allinone
     depends_on:
       - rabbitmq
     environment:
 #      CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
       CDR_KEEP_EVENT: "no"
-      #CALLBACK_URL: "${CALLBACK_URL}"
+#      CALLBACK_URL: "${CALLBACK_URL}"
       CALLBACK_URL: "https://${SERVER_NAME}/cdr"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
@@ -145,9 +145,9 @@ services:
     hostname: monitor
     build: monitor
     restart: unless-stopped
-    profiles:
-      - cdrhook
-      - allinone
+#    profiles:
+#      - cdrhook
+#      - allinone
     depends_on:
       - rabbitmq
     environment:
