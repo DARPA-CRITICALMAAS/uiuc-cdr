@@ -74,27 +74,15 @@ services:
       # Entrypoints
       - --entrypoints.http.address=:80
       - --entrypoints.http.http.redirections.entryPoint.to=https
-# ELK take next two lines out if not needed for ELK
-      - --entrypoints.https.address=:443
-      - --entrypoints.https.http.tls.certresolver=myresolver
-# ELK Dec 11: leaving in letsencrypt and testing certs section potentially for new ELK config
-# ELK but test if we can get rid of them, and if so, take them out to match new configuration from GH
-      # letsencrypt
-      - --certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL}
-      - --certificatesresolvers.myresolver.acme.storage=/config/acme.json
-      # uncomment to use testing certs
-      #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.myresolver.acme.httpchallenge=true
-      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
       # Docker setup
       - --providers.docker=true
       - --providers.docker.endpoint=unix:///var/run/docker.sock
       - --providers.docker.exposedbydefault=false
       - --providers.docker.watch=true
     restart: "unless-stopped"
-    profiles:
-      - traefik
-      - allinone
+#    profiles:
+#      - traefik
+#      - allinone
     security_opt:
       - no-new-privileges:true
     ports:
