@@ -1,8 +1,9 @@
 services:
 
-#
-# This sets up SSL stuff in a volume to make the ELK components happy (maybe?)
-# 
+  # ----------------------------------------------------------------------
+  # REVERSE PROXY
+  # ----------------------------------------------------------------------
+
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
@@ -58,14 +59,8 @@ services:
       timeout: 5s
       retries: 120
 
-
-
-
-  # ----------------------------------------------------------------------
-  # REVERSE PROXY
-  # ----------------------------------------------------------------------
   traefik:
-    image: "traefik:munster"
+    image: "traefik:v2.11"
     command:
       - --log.level=INFO
       - --api=true
@@ -74,19 +69,26 @@ services:
       # Entrypoints
       - --entrypoints.http.address=:80
       - --entrypoints.http.http.redirections.entryPoint.to=https
+      - --entrypoints.https.address=:443
+      - --entrypoints.https.http.tls.certresolver=myresolver
+      # letsencrypt
+      - --certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL}
+      - --certificatesresolvers.myresolver.acme.storage=/config/acme.json
+      # uncomment to use testing certs
+      #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.myresolver.acme.httpchallenge=true
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
       # Docker setup
       - --providers.docker=true
       - --providers.docker.endpoint=unix:///var/run/docker.sock
       - --providers.docker.exposedbydefault=false
       - --providers.docker.watch=true
     restart: "unless-stopped"
-#    profiles:
-#      - traefik
-#      - allinone
     security_opt:
       - no-new-privileges:true
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - "traefik:/config"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -98,9 +100,6 @@ services:
     image: rabbitmq:3.13-management
     hostname: rabbitmq
     restart: unless-stopped
-#    profiles:
-#      - cdrhook
-#      - allinone
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME:-guest}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-guest}"
@@ -112,19 +111,15 @@ services:
   # CDR HOOK
   # ----------------------------------------------------------------------
   cdrhook:
-    image: ncsa/criticalmaas-cdr:${CDRHOOK_VERSION:-latest}
+    image: ncsa/criticalmaas-cdr:latest
     hostname: cdrhook
+    build: cdrhook
     restart: unless-stopped
-#    profiles:
-#      - cdrhook
-#      - allinone
     depends_on:
       - rabbitmq
     environment:
-#      CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
       CDR_KEEP_EVENT: "no"
-#      CALLBACK_URL: "${CALLBACK_URL}"
       CALLBACK_URL: "https://${SERVER_NAME}/cdr"
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
@@ -141,13 +136,10 @@ services:
   # RABBITMQ MONITOR
   # ----------------------------------------------------------------------
   monitor:
-    image: ncsa/criticalmaas-monitor:${CDRHOOK_VERSION:-latest}
+    image: ncsa/criticalmaas-monitor:latest
     hostname: monitor
     build: monitor
     restart: unless-stopped
-#    profiles:
-#      - cdrhook
-#      - allinone
     depends_on:
       - rabbitmq
     environment:
@@ -162,17 +154,17 @@ services:
   # DATA PROCESSING PIPELINE
   # use one, or more, per model to be executed
   # ----------------------------------------------------------------------
-  icy-resin:
-    image: ncsa/criticalmaas-pipeline:${PIPELINE_VERSION:-latest}
+  golden_muscat:
+    image: ncsa/criticalmaas-pipeline:latest
+    build: ../uiuc-pipeline
     runtime: nvidia
-    restart: "unless-stopped"
     profiles:
       - pipeline
-      - allinone
+    depends_on:
+      - rabbitmq
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       PREFIX: ""
-    ipc: host
     command:
       - -v 
       - --data
@@ -187,10 +179,9 @@ services:
       - "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
       - --inactive_timeout
       - "86000"
-      - --output_types
-      - cdr_json
       - --model
-      - icy_resin
+      - golden_muscat
+    restart: "unless-stopped"
     volumes:
       - "data:/data"
       - "logs:/logs"
@@ -201,24 +192,27 @@ services:
   # DOWNLOADER and UPLOADER
   # ----------------------------------------------------------------------
   downloader:
-    image: ncsa/criticalmaas-downloader:${CDRHOOK_VERSION:-latest}
+    image: ncsa/criticalmaas-downloader:latest
+    build: uploader
     restart: "unless-stopped"
     profiles:
       - pipeline
-      - allinone
+    depends_on:
+      - rabbitmq
     environment:
       RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
     volumes:
       - "data:/data"
 
   uploader:
-    image: ncsa/criticalmaas-uploader:${CDRHOOK_VERSION:-latest}
+    image: ncsa/criticalmaas-uploader:latest
+    build: uploader
     restart: "unless-stopped"
     profiles:
       - pipeline
-      - allinone
+    depends_on:
+      - rabbitmq
     environment:
-#      CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
       RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
       PREFIX: ""
@@ -244,14 +238,11 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - bootstrap.memory_lock=true
       - xpack.security.enabled=true
-#      - xpack.security.enabled=false
-#      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=certs/es01/es01.key
       - xpack.security.http.ssl.certificate=certs/es01/es01.crt
       - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
-#      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=true
       - xpack.security.transport.ssl.key=certs/es01/es01.key
       - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
       - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
@@ -303,6 +294,13 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+
+#networks:
+#  elk:
+#  default:
+#    name: elastic
+#    driver: bridge
+#    external: false
 
 volumes:
   traefik:
