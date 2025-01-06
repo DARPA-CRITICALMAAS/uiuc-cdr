@@ -58,7 +58,7 @@ class CdrConnector(BaseModel):
             "events": self.events
         }
         logging.info(f"Registering with CDR: [system_name : {registration['name']}, system_version : {registration['version']}, callback_url : {registration['callback_url']}")
-        r = requests.post(f"{self.cdr_url}/user/me/register", json=registration, headers=headers)
+        r = requests.post(f"{self.cdr_url}user/me/register", json=registration, headers=headers)
         logging.debug(r.text)
         r.raise_for_status()
         self.registration = r.json()["id"]
