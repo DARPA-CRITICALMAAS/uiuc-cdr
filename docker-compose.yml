@@ -75,7 +75,7 @@ services:
       - --certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL}
       - --certificatesresolvers.myresolver.acme.storage=/config/acme.json
       # uncomment to use testing certs
-      #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      # - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.myresolver.acme.httpchallenge=true
       - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
       # Docker setup
@@ -111,7 +111,7 @@ services:
   # CDR HOOK
   # ----------------------------------------------------------------------
   cdrhook:
-    image: ncsa/criticalmaas-cdr:latest
+    image: ncsa/criticalmaas-cdr:pr-27  # ${CDRHOOK_VERSION:-latest}
     hostname: cdrhook
     build: cdrhook
     restart: unless-stopped
@@ -166,7 +166,7 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       PREFIX: ""
     command:
-      - -v 
+      - -v
       - --data
       - /data
       - --log
@@ -219,9 +219,70 @@ services:
     volumes:
       - "output:/output"
 
-  es01:
+  setupElk:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    profiles:
+      - elk
+      - allinone
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+    user: "0"
+    command: >
+      bash -c '
+      if [ x${ELASTIC_PASSWORD} == x ]; then
+        echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+        exit 1;
+      elif [ x${KIBANA_PASSWORD} == x ]; then
+        echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+        exit 1;
+      fi;
+      if [ ! -f config/certs/ca.zip ]; then
+        echo "Creating CA";
+        bin/elasticsearch-certutil ca --silent --pem --out config/certs/ca.zip;
+        unzip config/certs/ca.zip -d config/certs;
+      fi;
+      if [ ! -f config/certs/certs.zip ]; then
+        echo "Creating certs";
+        echo -ne \
+        "instances:\n"\
+        "  - name: es01Elk\n"\
+        "    dns:\n"\
+        "      - es01Elk\n"\
+        "      - localhost\n"\
+        "    ip:\n"\
+        "      - 127.0.0.1\n"\
+        "  - name: kibana\n"\
+        "    dns:\n"\
+        "      - kibana\n"\
+        "      - localhost\n"\
+        "    ip:\n"\
+        "      - 127.0.0.1\n"\
+        > config/certs/instances.yml;
+        bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+        unzip config/certs/certs.zip -d config/certs;
+      fi;
+      echo "Setting file permissions"
+      chown -R root:root config/certs;
+      find . -type d -exec chmod 750 \{\} \;;
+      find . -type f -exec chmod 640 \{\} \;;
+      echo "Waiting for Elasticsearch availability";
+      until curl -s --cacert config/certs/ca/ca.crt https://es01Elk:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+      echo "Setting kibana_system password";
+      until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01Elk:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+      echo "All done!";
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/es01Elk/es01Elk.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+
+  es01Elk:
+    profiles:
+      - elk
+      - allinone
     depends_on:
-      setup:
+      setupElk:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     labels:
@@ -232,19 +293,19 @@ services:
     ports:
       - ${ES_PORT}:9200
     environment:
-      - node.name=es01
+      - node.name=es01Elk
       - cluster.name=${CLUSTER_NAME}
       - discovery.type=single-node
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - bootstrap.memory_lock=true
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=certs/es01/es01.key
-      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.http.ssl.key=certs/es01Elk/es01Elk.key
+      - xpack.security.http.ssl.certificate=certs/es01Elk/es01Elk.crt
       - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.key=certs/es01/es01.key
-      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.transport.ssl.key=certs/es01Elk/es01Elk.key
+      - xpack.security.transport.ssl.certificate=certs/es01Elk/es01Elk.crt
       - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.verification_mode=certificate
       - xpack.license.self_generated.type=${LICENSE}
@@ -263,9 +324,12 @@ services:
       timeout: 10s
       retries: 120
 
-  kibana:
+  kibanaElk:
+    profiles:
+      - elk
+      - allinone
     depends_on:
-      es01:
+      es01Elk:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     labels:
@@ -276,8 +340,8 @@ services:
     ports:
       - ${KIBANA_PORT}:5601
     environment:
-      - SERVERNAME=kibana
-      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - SERVERNAME=kibanaElk
+      - ELASTICSEARCH_HOSTS=https://es01Elk:9200
       - ELASTICSEARCH_USERNAME=kibana_system
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
@@ -295,37 +359,76 @@ services:
       timeout: 10s
       retries: 120
 
-# pasted in from configuration _009
-# logstash for elk
-  logstash:
-    image: logstash:8.16.1
-    container_name: logstash
-    command: bash -c "bin/logstash-plugin install logstash-integration-rabbitmq && logstash "
-    ports:
-      - "5044:5044"
-      - "9600:9600"
-    environment:
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    volumes:
-      - ./elk-config/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./elk-config/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./ls_data:/usr/share/logstash/data:rw
-      - ./ls_logs:/usr/share/logstash/logs:rw
-      - ./ls_pipelines:/usr/share/logstash/pipelines
-#    networks:
-#      - elk
+  metricbeat01:
+    profiles:
+      - elk
+      - allinone
     depends_on:
-#      - elasticsearch  
-      - es01
+      es01Elk:
+        condition: service_healthy
+      kibanaElk:
+        condition: service_healthy
+    image: docker.elastic.co/beats/metricbeat:${STACK_VERSION}
+    user: root
+    volumes:
+      - certs:/usr/share/metricbeat/certs
+      - metricbeatdata01:/usr/share/metricbeat/data
+      - "./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01Elk:9200
+      - KIBANA_HOSTS=http://kibana:5601
+      - LOGSTASH_HOSTS=http://logstash01:9600
 
 
+  filebeat01:
+    profiles:
+      - elk
+      - allinone
+    depends_on:
+      es01Elk:
+        condition: service_healthy
+    image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
+    user: root
+    volumes:
+      - certs:/usr/share/filebeat/certs
+      - filebeatdata01:/usr/share/filebeat/data
+      - "./filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
+      - "./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01Elk:9200
+      - KIBANA_HOSTS=http://kibana:5601
+      - LOGSTASH_HOSTS=http://logstash01:9600
 
-#networks:
-#  elk:
-#  default:
-#    name: elastic
-#    driver: bridge
-#    external: false
+  logstash01:
+    depends_on:
+      es01Elk:
+        condition: service_healthy
+      kibanaElk:
+        condition: service_healthy
+    image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
+    labels:
+      co.elastic.logs/module: logstash
+    user: root
+    volumes:
+      - certs:/usr/share/logstash/certs
+      - logstashdata01:/usr/share/logstash/data
+      - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
+      - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
+    environment:
+      - xpack.monitoring.enabled=false
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01Elk:9200
 
 volumes:
   traefik:
@@ -335,7 +438,6 @@ volumes:
   data:
   logs:
   output:
-  test_data:
   certs:
     driver: local
   esdata01:
