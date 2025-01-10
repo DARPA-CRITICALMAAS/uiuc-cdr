@@ -94,6 +94,7 @@ curl -L -s $URL/docker-compose.yml -o docker-compose.yml
 # -------------------------------------------------------
 cat << EOF > .env
 SERVER_NAME="${SERVER_NAME}"
+RABBITMQ_URI="${RABBITMQ_URI}"
 CDR_URL="${CDR_URL}"
 
 TRAEFIK_ACME_EMAIL="${EMAIL_ADDRESS}"
