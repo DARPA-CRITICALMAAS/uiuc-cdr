@@ -67,7 +67,7 @@ services:
       CALLBACK_SECRET: "${CALLBACK_SECRET}"
       CALLBACK_USERNAME: "${CALLBACK_USERNAME}"
       CALLBACK_PASSWORD: "${CALLBACK_PASSWORD}"
-      RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      RABBITMQ_URI: "${RABBITMQ_URI}"
       PREFIX: ""
     labels:
       - "traefik.enable=true"
@@ -122,7 +122,7 @@ services:
       - --feedback
       - /feedback
       - --amqp
-      - "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      - "${RABBITMQ_URI}"
       - --inactive_timeout
       - "86000"
       - --output_types
@@ -145,7 +145,7 @@ services:
       - pipeline
       - allinone
     environment:
-      RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      RABBITMQ_URI: "${RABBITMQ_URI}"
     volumes:
       - "data:/data"
 
@@ -158,7 +158,7 @@ services:
     environment:
       CDR_URL: "${CDR_URL}"
       CDR_TOKEN: "${CDR_TOKEN}"
-      RABBITMQ_URI: "amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq/%2F"
+      RABBITMQ_URI: "${RABBITMQ_URI}"
       PREFIX: ""
     volumes:
       - "output:/output"

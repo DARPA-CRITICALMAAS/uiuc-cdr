@@ -44,7 +44,7 @@ export CDRHOOK_VERSION=latest
 # -------------------------------------------------------
 # for pipeline docker-compose/launcher
 # -------------------------------------------------------
-export RABBITMQ_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@server.url:5672/%2F
+export RABBITMQ_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${SERVER_NAME}:5672/%2F
 export MONITOR_URL=https://{SERVER_NAME}/monitor/queues.json
 # using a specific version of the pipeline
 export PIPELINE_VERSION=latest
