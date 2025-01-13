@@ -74,12 +74,14 @@ If you do not plan to expose the `rabbitmq` interface to the internet, and every
 
 The docker-compose file uses profiles to allow for different parts to be executed based on your environment:
 
-- **default**: this will start `traefik`, `rabbitmq`, `cdrhook` and `monitor`
-- **pipeline**: this will additionally start `downloaded`, `golden_muscat` and `uploader`.
+- **traefik**: this will start the `traefik` proxy
+- **cdrhook**: this will start `rabbitmq`, `cdrhook` and `monitor`
+- **pipeline**: this will start `downloaded`, `golden_muscat` and `uploader`
+- **allinone**: this will start all containers
 
-To run additional models, you will need to copy the `golden_muscat` section in the docker-compose file and replace all references to golden_muscat to the other model (for example icy_resin). The model executions require a GPU, and we have tested this with a Nvidia A100 with 80GB.
+To run additional models, the easiest is to create a new folder, and run the quickstart there, and set the variable `PIPELINE_MODEL` in the secrets.sh file. The model executions require a GPU, and we have tested this with a Nvidia A100 with 80GB.
 
-For example to run the full system, you would execute `docker compose --profile pipeline up -d`, which will start the full stack and you will be able to see the monitor by going to the server url.
+For example to run the full system, you would execute `docker compose --profile allinone up -d`, which will start the full stack and you will be able to see the monitor by going to the server url.
 
 ### Volumes
 
@@ -96,6 +98,8 @@ volumes:
 ```
 
 An example can be found at [docker-compose.example.yml](docker-compose.example.yml) and can be renamed to be `docker-compose.override.yml`.
+
+If you want to run multiple models, you will need to use a shared folder (for example NFS) where the data is downloaded. The downloader will download the data once and write it to the (shared) folder and then launch all of the models. If the data is not on a shared folder, all but one of the models will not find the data and fail.
 
 ## HPC
 
