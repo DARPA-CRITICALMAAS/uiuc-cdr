@@ -67,9 +67,11 @@ def main(args):
                 cleanup_callback(channel, method, properties, body)
         except Exception as e:
             # Send to error queue
-            logging.error(f'Error deleting files: {e}')
+            logging.exception(f'Error deleting files: {e}')
+            data = json.loads(body)
+            data['exception'] = repr(e)
 
-            channel.basic_publish(exchange='', routing_key=ERROR_QUEUE, body=body, properties=properties)
+            channel.basic_publish(exchange='', routing_key=ERROR_QUEUE, body=json.dumps(data), properties=properties)
             channel.basic_ack(delivery_tag=method.delivery_tag)
             sleep(1)
     
