@@ -29,10 +29,13 @@ def cleanup_callback(channel, method, properties, body):
     # Delete files
     if os.path.exists(image_path):
         os.remove(image_path)
+        logging.debug(f'Deleted image file - {image_path}')
     if os.path.exists(cdr_json_path):
         os.remove(cdr_json_path)
+        logging.debug(f'Deleted cdr json file - {cdr_json_path}')
     if os.path.exists(uiuc_json_path):
         os.remove(uiuc_json_path)
+        logging.debug(f'Deleted uiuc json file - {uiuc_json_path}')
     
     # Send to output queue
     channel.basic_publish(exchange='', routing_key=OUTPUT_QUEUE, body=body, properties=properties)
@@ -55,6 +58,7 @@ def main(args):
 
     # create generator to fetch messages
     consumer = channel.consume(queue=INPUT_QUEUE, inactivity_timeout=1)
+    logging.info('Connected')
     
     while True:
         try:
