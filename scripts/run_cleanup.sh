@@ -42,6 +42,7 @@ if [ -z "$(apptainer instance list | grep criticalmaas-cleanup)" ]; then
         criticalmaas-cleanup_latest.sif \
         criticalmaas-cleanup \
             python /src/cleanup.py
+fi
 
 # showing log files
 echo "----------------------------------------------------------------------"
