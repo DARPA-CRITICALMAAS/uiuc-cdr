@@ -46,7 +46,6 @@ export CDRHOOK_VERSION=latest
 # for pipeline docker-compose/launcher
 # -------------------------------------------------------
 export RABBITMQ_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_SERVER}:5672/%2F
-export MONITOR_URL=https://{SERVER_NAME}/monitor/queues.json
 export PIPELINE_MODEL=icy-resin
 # using a specific version of the pipeline
 export PIPELINE_VERSION=latest
@@ -110,7 +109,7 @@ CALLBACK_SECRET="${CDRHOOK_SECRET}"
 CALLBACK_USERNAME=""
 CALLBACK_PASSWORD=""
 
-RABBITMQ_URI="${RABBITMQ_URI}"
+RABBITMQ_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_SERVER}:5672/%2F
 RABBITMQ_USERNAME="${RABBITMQ_USERNAME}"
 RABBITMQ_PASSWORD="${RABBITMQ_PASSWORD}"
 RABBITMQ_MGMT_URL="${RABBITMQ_MGMT_URL}"

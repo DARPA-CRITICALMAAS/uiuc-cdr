@@ -6,10 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.9.5] - 2025-01-13
 
-To use the `quickstart.sh` you will need to update the secrts.sh and add the following 2 variables:
+To use the `quickstart.sh` you will need to update the `secrets.sh` and add the following 2 variables:
 ```bash
 export RABBITMQ_SERVER=rabbitmq
 export PIPELINE_MODEL=icy-resin
+```
+and remove the following line:
+```bash
+export MONITOR_URL=https://...../monitor/queues.json
 ```
 
 ### Fixed
