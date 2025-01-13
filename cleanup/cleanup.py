@@ -28,9 +28,12 @@ def cleanup_callback(channel, method, properties, body):
 
     # Delete files
     try:
-        os.remove(image_path)
-        os.remove(cdr_json_path)
-        os.remove(uiuc_json_path)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+        if os.path.exists(cdr_json_path):
+            os.remove(cdr_json_path)
+        if os.path.exists(uiuc_json_path):
+            os.remove(uiuc_json_path)
     except Exception as e:
         # Send to error queue
         logging.error(f'Error deleting files for map {map_name}: {e}')
@@ -58,11 +61,8 @@ def main(args):
     channel.basic_qos(prefetch_count=1)
 
     # create generator to fetch messages
-    
     channel.basic_consume(queue=INPUT_QUEUE, on_message_callback=cleanup_callback, inactivity_timeout=1)
     
-    # channel.basic_consume(queue=f'{RABBITMQ_QUEUE_PREFIX}upload.error', on_message_callback=upload_error_callback, inactivity_timeout=1)
-
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
                                ' %(name)s - %(message)s',
