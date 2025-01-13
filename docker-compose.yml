@@ -100,7 +100,7 @@ services:
   # DATA PROCESSING PIPELINE
   # use one, or more, per model to be executed
   # ----------------------------------------------------------------------
-  icy-resin:
+  pipeline:
     image: ncsa/criticalmaas-pipeline:${PIPELINE_VERSION:-latest}
     runtime: nvidia
     restart: "unless-stopped"
@@ -110,6 +110,7 @@ services:
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       PREFIX: ""
+      PIPELINE_MODEL: ${PIPELINE_MODEL:-icy-resin}
     ipc: host
     command:
       - -v 
@@ -128,7 +129,7 @@ services:
       - --output_types
       - cdr_json
       - --model
-      - icy_resin
+      - ${PIPELINE_MODEL}
     volumes:
       - "data:/data"
       - "logs:/logs"

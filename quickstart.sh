@@ -32,7 +32,8 @@ export CDR_URL=https://api.cdr.land
 export RABBITMQ_USERNAME=guest
 export RABBITMQ_PASSWORD=guest
 # only change this if you have an external rabbitmq server
-export RABBITMQ_MGMT_URL=http://rabbitmq:15672
+export RABBITMQ_SERVER=rabbitmq
+export RABBITMQ_MGMT_URL=http://${RABBITMQ_SERVER}:15672
 # -------------------------------------------------------
 # for cdrhook docker-compose
 # -------------------------------------------------------
@@ -44,8 +45,9 @@ export CDRHOOK_VERSION=latest
 # -------------------------------------------------------
 # for pipeline docker-compose/launcher
 # -------------------------------------------------------
-export RABBITMQ_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${SERVER_NAME}:5672/%2F
+export RABBITMQ_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_SERVER}:5672/%2F
 export MONITOR_URL=https://{SERVER_NAME}/monitor/queues.json
+export PIPELINE_MODEL=icy-resin
 # using a specific version of the pipeline
 export PIPELINE_VERSION=latest
 EOF
@@ -108,11 +110,13 @@ CALLBACK_SECRET="${CDRHOOK_SECRET}"
 CALLBACK_USERNAME=""
 CALLBACK_PASSWORD=""
 
+RABBITMQ_URI="${RABBITMQ_URI}"
 RABBITMQ_USERNAME="${RABBITMQ_USERNAME}"
 RABBITMQ_PASSWORD="${RABBITMQ_PASSWORD}"
 RABBITMQ_MGMT_URL="${RABBITMQ_MGMT_URL}"
 
 PIPELINE_VERSION="${PIPELINE_VERSION}"
+PIPELINE_MODEL="${PIPELINE_MODEL}"
 EOF
 
 # -------------------------------------------------------
@@ -126,7 +130,9 @@ services:
   # ----------------------------------------------------------------------
   # Add SSL to traefik
   # ----------------------------------------------------------------------
-#   traefik:
+  traefik:
+    profiles:
+      - cdrhook
 #     command:
 #       - --log.level=INFO
 #       - --api=true
@@ -167,7 +173,7 @@ services:
       - "traefik.http.routers.rabbitmq.rule=Host(`${SERVER_NAME}`)"
 
   # Add dependency of rabbitmq
-  icy-resin:
+  pipeline:
     depends_on:
       - rabbitmq
 
