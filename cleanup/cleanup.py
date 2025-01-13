@@ -27,19 +27,12 @@ def cleanup_callback(channel, method, properties, body):
     logging.debug(f'Cleaning up files for - {map_name}')
 
     # Delete files
-    try:
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        if os.path.exists(cdr_json_path):
-            os.remove(cdr_json_path)
-        if os.path.exists(uiuc_json_path):
-            os.remove(uiuc_json_path)
-    except Exception as e:
-        # Send to error queue
-        logging.error(f'Error deleting files for map {map_name}: {e}')
-
-        channel.basic_publish(exchange='', routing_key=ERROR_QUEUE, body=body, properties=properties)
-        channel.basic_ack(delivery_tag=method.delivery_tag)
+    if os.path.exists(image_path):
+        os.remove(image_path)
+    if os.path.exists(cdr_json_path):
+        os.remove(cdr_json_path)
+    if os.path.exists(uiuc_json_path):
+        os.remove(uiuc_json_path)
     
     # Send to output queue
     channel.basic_publish(exchange='', routing_key=OUTPUT_QUEUE, body=body, properties=properties)
@@ -61,7 +54,20 @@ def main(args):
     channel.basic_qos(prefetch_count=1)
 
     # create generator to fetch messages
-    channel.basic_consume(queue=INPUT_QUEUE, on_message_callback=cleanup_callback, inactivity_timeout=1)
+    consumer = channel.consume(queue=INPUT_QUEUE, inactivity_timeout=1)
+    
+    while True:
+        try:
+            method, properties, body = next(consumer)
+            if method:
+                cleanup_callback(channel, method, properties, body)
+        except Exception as e:
+            # Send to error queue
+            logging.error(f'Error deleting files: {e}')
+
+            channel.basic_publish(exchange='', routing_key=ERROR_QUEUE, body=body, properties=properties)
+            channel.basic_ack(delivery_tag=method.delivery_tag)
+            sleep(1)
     
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)-15s [%(threadName)-15s] %(levelname)-7s :'
