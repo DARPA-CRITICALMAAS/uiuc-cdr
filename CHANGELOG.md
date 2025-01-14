@@ -15,6 +15,11 @@ and remove the following line:
 ```bash
 export MONITOR_URL=https://...../monitor/queues.json
 ```
+and finally modify the following lines:
+```bash
+export RABBITMQ_MGMT_URL=http://${RABBITMQ_SERVER}:15672
+export RABBITMQ_URI=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_SERVER}:5672/%2F
+```
 
 ### Fixed
 - fixed issue where the return parsed by pydantic would add a `/`
