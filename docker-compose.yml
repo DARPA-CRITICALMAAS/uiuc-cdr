@@ -51,7 +51,7 @@ services:
   # CDR HOOK
   # ----------------------------------------------------------------------
   cdrhook:
-    image: ncsa/criticalmaas-cdr:pr-27  # ${CDRHOOK_VERSION:-latest}
+    image: ${CDRHOOK_VERSION:-latest}
     hostname: cdrhook
     build: cdrhook
     restart: unless-stopped
