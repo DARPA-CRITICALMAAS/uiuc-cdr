@@ -20,7 +20,8 @@ def parse_command_line():
 
 def cleanup_callback(channel, method, properties, body):
     data = json.loads(body)
-    logging.debug(f"Cleaning up files for - {data['cog_id']}")
+    if 'cog_id' in data:
+        logging.info(f"Cleaning up files for - {data['cog_id']}")
     files_to_delete = []
     if 'image_filename' in data:
         files_to_delete.append(os.path.join(args.input_data, data['image_filename']))
