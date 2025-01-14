@@ -14,7 +14,7 @@ rabbitmq_uri = os.getenv("RABBITMQ_URI", "amqp://guest:guest@localhost:5672/%2F"
 prefix = os.getenv("PREFIX", "")
 
 # CDR url, token and max size for upload (in MB)
-cdr_url = "https://api.cdr.land"
+cdr_url = os.getenv("CDR_URL","https://api.cdr.land")
 cdr_token = os.getenv("CDR_TOKEN", "")
 max_size = int(os.getenv("MAX_SIZE", "300"))
 

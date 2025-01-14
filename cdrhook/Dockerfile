@@ -7,6 +7,7 @@ ARG VERSION="unknown"
 ENV PYTHONUNBUFFERED=1 \
     SYSTEM_NAME="ncsa" \
     SYSTEM_VERSION="${VERSION}" \
+    CDR_URL="https://api.cdr.land" \
     CDR_TOKEN="" \
     CDR_KEEP_EVENT="no" \
     CALLBACK_SECRET="this_is_a_really_silly_secret" \

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.6] - 2025-01-14
+
+### Fixed
+- can now change the URL for cdr in uploader
+
 ## [0.9.5] - 2025-01-13
 
 To use the `quickstart.sh` you will need to update the `secrets.sh` and add the following 2 variables:
