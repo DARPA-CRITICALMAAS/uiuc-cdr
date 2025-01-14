@@ -20,22 +20,20 @@ def parse_command_line():
 
 def cleanup_callback(channel, method, properties, body):
     data = json.loads(body)
-    image_path = os.path.join(args.input_data, data['image_filename'])
-    cdr_json_path = os.path.join(args.input_data, data['json_filename'])
-    uiuc_json_path = os.path.join(args.predict_data, data['cdr_output'])
-    map_name = os.path.splitext(os.path.basename(image_path))[0]
-    logging.debug(f'Cleaning up files for - {map_name}')
+    logging.debug(f'Cleaning up files for - {data['cog_id']}')
+    files_to_delete = []
+    if 'image_filename' in data:
+        files_to_delete.append(os.path.join(args.input_data, data['image_filename']))
+    if 'json_filename' in data:
+        files_to_delete.append(os.path.join(args.input_data, data['json_filename']))
+    if 'cdr_output' in data:
+        files_to_delete.append(os.path.join(args.predict_data, data['cdr_output']))
 
     # Delete files
-    if os.path.exists(image_path):
-        os.remove(image_path)
-        logging.debug(f'Deleted image file - {image_path}')
-    if os.path.exists(cdr_json_path):
-        os.remove(cdr_json_path)
-        logging.debug(f'Deleted cdr json file - {cdr_json_path}')
-    if os.path.exists(uiuc_json_path):
-        os.remove(uiuc_json_path)
-        logging.debug(f'Deleted uiuc json file - {uiuc_json_path}')
+    for file in files_to_delete:
+        if os.path.exists(file):
+            os.remove(file)
+            logging.debug(f'Deleted file - {file}')
     
     # Send to output queue
     channel.basic_publish(exchange='', routing_key=OUTPUT_QUEUE, body=body, properties=properties)
