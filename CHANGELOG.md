@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 To use the `quickstart.sh` you will need to update the `secrets.sh` and add the following 2 variables:
 ```bash
 export RABBITMQ_SERVER=rabbitmq
-export PIPELINE_MODEL=icy-resin
+export PIPELINE_MODEL=icy_resin
 ```
 and remove the following line:
 ```bash
