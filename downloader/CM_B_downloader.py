@@ -35,6 +35,7 @@ except KeyError:
 
 download_main_queue="download"
 download_error_queue="download.error"
+CLEANUP_QUEUE = 'cleanup'
 
 # name preamble for processing queues, to make it easier for humans to see the
 # function of the processing queues
@@ -299,6 +300,7 @@ def main(argv):
     # from this point, following the template from the uploader
     channel.queue_declare(queue=download_main_queue, durable=True)
     channel.queue_declare(queue=download_error_queue, durable=True)
+    channel.queue_declare(queue=CLEANUP_QUEUE, durable=True)
     # We only know for sure our incoming download queue and its error queue.  
     # Queues for models are defined according to incoming messages, so we
     # don't pre-declare them here.  
@@ -336,6 +338,9 @@ def main(argv):
                 if worker.exception:
                     my_output_dictionary['exception'] = repr(worker.exception)
                     channel.basic_publish(exchange='', routing_key=download_error_queue,
+                                          body=json.dumps(my_output_dictionary),
+                                          properties=worker.properties)
+                    channel.basic_publish(exchange='', routing_key=CLEANUP_QUEUE,
                                           body=json.dumps(my_output_dictionary),
                                           properties=worker.properties)
                 else:
