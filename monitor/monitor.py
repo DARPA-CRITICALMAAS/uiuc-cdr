@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2025 The Trustees of the University of Illinois
+# licensed under the MIT License
+# see "LICENSE" file in the distribution root directory
+
 import http.server
 import json
 import logging
