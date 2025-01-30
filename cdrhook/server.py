@@ -1,3 +1,8 @@
+
+# Copyright (c) 2025 The Trustees of the University of Illinois
+# licensed under the MIT License
+# see "LICENSE" file in the distribution root directory
+
 from flask import Flask, request, abort, current_app, send_from_directory
 from flask_httpauth import HTTPBasicAuth
 import os

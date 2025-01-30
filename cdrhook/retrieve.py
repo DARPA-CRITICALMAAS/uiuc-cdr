@@ -1,3 +1,8 @@
+
+# Copyright (c) 2025 The Trustees of the University of Illinois
+# licensed under the MIT License
+# see "LICENSE" file in the distribution root directory
+
 from typing import List, Literal
 from connector import CdrConnector
 from cdr_endpoint_schemas import SystemId, CogSystemVersionsSchema, CogMetadataSchema, CogDownloadSchema

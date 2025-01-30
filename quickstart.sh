@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Copyright (c) 2025 The Trustees of the University of Illinois
+# licensed under the MIT License
+# see "LICENSE" file in the distribution root directory
+
 # check requirements
 if [ ! -e /usr/bin/docker ]; then
     echo "Docker is not installed, please install docker"

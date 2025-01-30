@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Copyright (c) 2025 The Trustees of the University of Illinois
+# licensed under the MIT License
+# see "LICENSE" file in the distribution root directory
+
 #SBATCH -p a100
 #SBATCH -A bbym-hydro
 #SBATCH --time 08:00:00
