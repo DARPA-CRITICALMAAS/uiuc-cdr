@@ -115,7 +115,7 @@ def process_event(event_id):
 def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optional[dict]=None, parameters : Optional[dict]=None):
     """
     Processing callback for cogs. Checks if there is enough information available
-    to process the cog with the requested models. If there is downloads the 
+    to process the cog with the requested models. If there is downloads the
     prereq data from the CDR, saves it to a temporary file and fires the download
     event to rabbitmq.
 
@@ -161,9 +161,9 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             cog_legend_items = retrieve_cog_legend_items(cdr_connector, cog_id, system_id=systemid, validated="false")
             if cog_legend_items:
                 break
-    if cog_legend_items is not None:    
+    if cog_legend_items is not None:
         logging.debug(f"Cog-{cog_id[0:8]} - Found {len(cog_legend_items)} legend items")
-    else: 
+    else:
         logging.debug(f"Cog-{cog_id[0:8]} - No legend items found")
 
     # checking for area, logic will be:
@@ -185,7 +185,7 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             # 2.2 fetch the area items for the system
             cog_area_extraction = retrieve_cog_area_extraction(cdr_connector, cog_id, system_id=systemid)
             if cog_area_extraction:
-                break    
+                break
     if cog_area_extraction is not None:
         logging.debug(f"Cog-{cog_id[0:8]} - Found {len(cog_area_extraction)} area items")
     else:
@@ -204,9 +204,13 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             else:
                 ae_categories[ae.category] += 1
         logging.debug(f"Cog-{cog_id[0:8]} - Found {ae_categories}")
-        poly_map_units = [mu for mu in cog_legend_items if mu.category == 'polygon']
-        logging.debug(f"Cog-{cog_id[0:8]} - Found {len(poly_map_units)} polygon map units")
-        
+        if cog_legend_items is not None:
+            poly_map_units = [mu for mu in cog_legend_items if mu.category == 'polygon']
+            logging.debug(f"Cog-{cog_id[0:8]} - Found {len(poly_map_units)} polygon map units")
+        else:
+            poly_map_units = []
+            logging.debug(f"Cog-{cog_id[0:8]} - Found 0 polygon map units")
+
         valid_map_area, valid_polygon_legend_area, valid_polygon_map_units = True, True, True
         if ae_categories[AreaType.Map_Area] < 1:
             logging.debug(f"Cog-{cog_id[0:8]} - No map area found")
@@ -220,30 +224,41 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
         # if len(poly_map_units) < 1:
         #     logging.debug(f"Cog-{cog_id[0:8]} - No polygon legend items found")
         #     valid_polygon_map_units = False
-        
+
         # Check what models to fire, unless they are already specified
         for model, prereqs in config_parm["models"].items():
             goodmodel = True
             if "map_area" in prereqs and not valid_map_area:
-                logging.debug("Skipping %s because of map_area", model)
+                logging.debug("Skipping %s because map_area is missing", model)
                 goodmodel = False
             if "polygon_legend_area" in prereqs and not valid_polygon_legend_area:
                 logging.debug("Skipping %s because of polygon_legend_area", model)
                 goodmodel = False
             if "line_point_legend_area" in prereqs and not valid_line_point_legend_area:
-                logging.debug("Skipping %s because of line_point_legend_area", model)
+                logging.debug("Skipping %s because line_point_legend_area is missing", model)
                 goodmodel = False
             if "polygon_map_units" in prereqs and not valid_polygon_map_units:
-                logging.debug("Skipping %s because of polygon_map_units", model)
+                logging.debug("Skipping %s because polygon_map_units is missing", model)
                 goodmodel = False
             if goodmodel:
                 logging.info(f"{cog_id[0:8]} - Firing download event for {model}")
                 firemodels.append(model)
+            else:
+                # If CDR has legends and map areas, over ride above logic and fire models
+                if (cog_legend_items is not None) and (len(poly_map_units) > 0):
+                    for model, prereqs in config_parm["models"].items():
+                        goodmodel = True
+                    if "map_area" in prereqs and not valid_map_area:
+                        logging.debug("Legend Items exist but Skipping %s because of map_area is missing", model)
+                        goodmodel = False
+                    if goodmodel:
+                        logging.info(f"{cog_id[0:8]} - Overide Skip, CDR had valid legends. Firing download event for {model}")
+                        firemodels.append(model)
 
     # only continue if there are models to fire
     if len(firemodels) == 0:
         raise ValueError(f"Cannot process {cog_id}, no models were able to be started")
-        
+
     # Retrieve download link for the geotiff
     cog_download = retrieve_cog_download(cdr_connector, cog_id)
 
@@ -356,7 +371,7 @@ def cdrhook_callback(channel, method, properties, body):
                 logging.debug(f"Ignoring feature.process with id {event_id}")
         else:
             logging.debug("Unknown event %s", data.get("event"))
-        
+
         if config["cdr_keep_event"]:
             send_message(data, f'{config["prefix"]}cdrhook.unknown')
     except Exception as e:
@@ -411,7 +426,7 @@ def create_app():
     config["rabbitmq_uri"] = os.getenv("RABBITMQ_URI")
     config["prefix"] = os.getenv("PREFIX")
     config["cdr_keep_event"] = strtobool(os.getenv("CDR_KEEP_EVENT", "no"))
-    
+
     # load the models
     with open("models.json", "r") as f:
         config["models"] = json.load(f)
