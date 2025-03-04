@@ -204,8 +204,12 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             else:
                 ae_categories[ae.category] += 1
         logging.debug(f"Cog-{cog_id[0:8]} - Found {ae_categories}")
-        poly_map_units = [mu for mu in cog_legend_items if mu.category == 'polygon']
-        logging.debug(f"Cog-{cog_id[0:8]} - Found {len(poly_map_units)} polygon map units")
+        if cog_legend_items is not None:
+            poly_map_units = [mu for mu in cog_legend_items if mu.category == 'polygon']
+            logging.debug(f"Cog-{cog_id[0:8]} - Found {len(poly_map_units)} polygon map units")
+        else:
+            poly_map_units = []
+            logging.debug(f"Cog-{cog_id[0:8]} - Found 0 polygon map units")
 
         valid_map_area, valid_polygon_legend_area, valid_polygon_map_units = True, True, True
         if ae_categories[AreaType.Map_Area] < 1:
@@ -239,17 +243,17 @@ def process_cog(cdr_connector : CdrConnector , cog_id : str, config_parm : Optio
             if goodmodel:
                 logging.info(f"{cog_id[0:8]} - Firing download event for {model}")
                 firemodels.append(model)
-
-    # If validated legends and map area exisits, over ride above logic and fire models
-    if cog_legend_items is not None:
-        for model, prereqs in config_parm["models"].items():
-            goodmodel = True
-            if "map_area" in prereqs and not valid_map_area:
-                logging.debug("Legend Items exist but Skipping %s because of map_area is missing", model)
-                goodmodel = False
-            if goodmodel:
-                logging.info(f"{cog_id[0:8]} - Firing download event for {model}")
-                firemodels.append(model)
+            else:
+                # If CDR has legends and map areas, over ride above logic and fire models
+                if (cog_legend_items is not None) and (len(poly_map_units) > 0):
+                    for model, prereqs in config_parm["models"].items():
+                        goodmodel = True
+                    if "map_area" in prereqs and not valid_map_area:
+                        logging.debug("Legend Items exist but Skipping %s because of map_area is missing", model)
+                        goodmodel = False
+                    if goodmodel:
+                        logging.info(f"{cog_id[0:8]} - Overide Skip, CDR had valid legends. Firing download event for {model}")
+                        firemodels.append(model)
 
     # only continue if there are models to fire
     if len(firemodels) == 0:
