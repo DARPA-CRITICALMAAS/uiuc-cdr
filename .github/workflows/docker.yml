@@ -22,6 +22,7 @@ jobs:
           - uploader
           - monitor
           - downloader
+          - cleanup
         include:
           - name: cdrhook
             FOLDER: cdrhook
@@ -40,6 +41,10 @@ jobs:
             FOLDER: downloader
             PLATFORM: "linux/amd64,linux/arm64"
             IMAGE: criticalmaas-downloader
+          - name: cleanup
+            FOLDER: cleanup
+            PLATFORM: "linux/amd64,linux/arm64"
+            IMAGE: criticalmaas-cleanup
 
     steps:
       - uses: actions/checkout@v4

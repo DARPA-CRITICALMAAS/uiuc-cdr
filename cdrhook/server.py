@@ -363,6 +363,7 @@ def cdrhook_callback(channel, method, properties, body):
         logging.exception("Error processing cdrhook message.")
         data["exception"] = repr(e)
         send_message(data, f'{config["prefix"]}cdrhook.error')
+        send_message(data, f'{config["prefix"]}cleanup')
     channel.basic_ack(delivery_tag=method.delivery_tag)
 
 def cdrhook_listener(config):
@@ -383,6 +384,7 @@ def cdrhook_listener(config):
             # create all queues needed
             channel.queue_declare(queue=f'{config["prefix"]}cdrhook', durable=True)
             channel.queue_declare(queue=f'{config["prefix"]}cdrhook.error', durable=True)
+            channel.queue_declare(queue=f'{config["prefix"]}cleanup', durable=True)
 
             # process messages
             channel.basic_qos(prefetch_count=1)
